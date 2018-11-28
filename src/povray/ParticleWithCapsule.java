@@ -34,6 +34,11 @@ public class ParticleWithCapsule implements Serializable
 	 * Vector that notes the location of a particular LocatedAgent agent
 	 */
 	private VectorProperty center;
+	
+	/**
+	 * Vector that notes the second coordinate of a cylindrical agent of a particular LocatedAgent agent
+	 */
+	private VectorProperty centerHeight;
 
 	/**
 	 * Radius of the agent core, but transformed into a size that can be represented in POV-Ray
@@ -70,11 +75,23 @@ public class ParticleWithCapsule implements Serializable
 	 */
 	private boolean _hasCapsule;
 	
+	
+	
+	/**
+	 * Boolean noting whether this agent is Fungus
+	 */
+	private boolean _isFungus;
+	
 	/**
 	 * Fraction of this agent that is active biomass
 	 */
 	private double _activeFrac;
-
+	
+	private String _core;
+	
+	
+	
+	
 	/**
 	 * \brief Constructor that initialises this storage object, creating the required center and colour vector properties
 	 * 
@@ -82,6 +99,7 @@ public class ParticleWithCapsule implements Serializable
 	 */
 	public ParticleWithCapsule() {
 		center = new VectorProperty("");
+		centerHeight = new VectorProperty("");
 		_colorCore = new VectorProperty("color rgb");
 	}
 
@@ -94,14 +112,30 @@ public class ParticleWithCapsule implements Serializable
 	{
 		center = new VectorProperty("");
 		setCenter(p.getLocation());
-
+		
+		
+		centerHeight = new VectorProperty("");
+		setCenterHeight(p.getLocationHeight());
+			
+		
 		_colorCore = new VectorProperty("color rgb");
 		setColorCore(p.getColor());
-		setCoreRadius(p.getRadius(true));
+		
 
 		// bvm 27.1.2009 for using color definitions
 
 		setNameCore(p.getName());
+		
+		
+		
+		/*System.out.println(p.getStringClass());*/
+		_isFungus=p.getStringClass().equals("Fungus");
+		if (_isFungus) {
+			setCoreRadius(p._radius);
+		}else {
+		setCoreRadius(p.getRadius(true));}
+		
+		
 		setActiveFrac(p.getActiveFrac());
 
 		_hasCapsule = p.hasEPS();
@@ -190,6 +224,18 @@ public class ParticleWithCapsule implements Serializable
 	}
 
 	/**
+	 * \brief Set the second coordinate of the output cylindrical agent to a transformation of the current agent location
+	 * 
+	 * 
+	 * @param c	The current location+height of the located agent, expressed as a vector
+	 */
+	
+	public void setCenterHeight(ContinuousVector c) {
+		double s = Povray3DScene.getScaling();
+		centerHeight.setValues(c.x/s, c.y/s, c.z/s);
+	}
+	
+	/**
 	 * \brief Set the radius of the output agent to a transformation of the current agent radius
 	 * 
 	 * Set the radius of the output agent to a transformation of the current agent radius
@@ -198,6 +244,7 @@ public class ParticleWithCapsule implements Serializable
 	 */
 	public void setCoreRadius(double fs) {
 		_radiusCore = fs/Povray3DScene.getScaling();
+		/*System.out.println(_radiusCore);*/
 	}
 	/**
 	 * \brief Represents the information about this particle with capsule as a string
@@ -211,21 +258,34 @@ public class ParticleWithCapsule implements Serializable
 
 		// bvm 27.1.2009: modified this output to use color definitions and
 		// textures rather than pigments
-		String core = "sphere {\n"
+		
+		
+
+		if (_isFungus) {
+			 _core = "cylinder {\n"
+				+ "\t " + center + 
+				 ", " + centerHeight + "\n"
+				+ "\t " + _radiusCore + "\n"
+				+ "\t pigment { " + _nameCore + "*" + _activeFrac + " }\n"
+				+ "}\n";
+		}else {
+			_core = "sphere {\n"
 			+ "\t "	+ center + "\n"
 			+ "\t "	+ _radiusCore + "\n"
 			+ "\t pigment { " + _nameCore + "*" + _activeFrac + " }\n"
 			+ "}\n";
-
+		
+		}
+		
 		if (_hasCapsule) {
 			String capsule = "sphere {\n"
 				+ "\t " + center + "\n"
 				+ "\t " + _radiusCapsule + "\n"
 				+ "\t pigment { " + _nameCapsule + "*" + _activeFrac + " }\n"
 				+ "}\n";
-			return core + capsule;
+			return _core + capsule;
 		}
 
-		return core;
+		return _core;
 	}
 }

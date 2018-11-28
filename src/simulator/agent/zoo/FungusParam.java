@@ -35,12 +35,12 @@ public class FungusParam extends LocatedParam
 	/**
 	 * Maximal fraction of eps volume before excretion 
 	 */
-	public double epsMax = .15;
+	public double epsMax = 0.15;
 	
 	/**
 	 * Colour assigned to eps when visualising results in POV-Ray
 	 */
-	public Color epsColor = Color.lightGray;
+	public Color epsColor = Color.red;
 	
 	/**
 	 * How particle mass is distributed: false -> normal/gaussian, true -> exponential (power of 2)

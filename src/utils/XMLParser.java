@@ -215,6 +215,10 @@ public class XMLParser implements Serializable
 		return getAttribute("name");
 	}
 	
+	public String getStringClass()
+	{
+		return getAttribute("class");
+	}
 	/**
 	 * \brief Returns the XML element of a given child node tag name.
 	 * 

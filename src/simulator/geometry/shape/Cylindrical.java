@@ -126,6 +126,7 @@ public class Cylindrical extends IsShape
 		_dPointCenterBase = new DiscreteVector(shapeRoot.getParamParser("pointCenter"));
 		_dVectorAlongAxis = new DiscreteVector(shapeRoot.getParamParser("vectorAxis"));
 		_radius = shapeRoot.getParamLength("radius");
+		/*_length=shapeRoot.getParamLength("height");*/
 		_interiorMatchesDomain = shapeRoot.getParamBool("interiorMatchesDomain");
 		
 		Double res = aDomain.getResolution();

@@ -52,12 +52,26 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	/**
 	 * Radius of this agent.
 	 */
-	protected Double _radius = 0.0;
+	public Double _radius = 5.0;
 	
 	/**
 	 * Cell radius including any capsules.
 	 */
-	protected Double _totalRadius = 0.0;
+	public Double _totalRadius = 5.0;
+	
+	/**
+	 * Height of this agent.
+	 */
+	public Double _height = 10.0;
+	
+	/**
+	 * Cell Height including any capsules.
+	 */
+	public Double _totalHeight = 10.0;
+	
+	
+	
+	
 	
 	/**
 	 * Radius at which this agent will divide.
@@ -212,8 +226,8 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 * \brief Create an agent using information in a previous state or
 	 * initialization file.
 	 *
-	 * Reads in data from the last section of the singleAgentData array and then
-	 * lets the super class read in the previous section of the array.
+	 * Reads in data from the end of the singleAgentData array and then passes
+	 * the remaining values onto the super class.
 	 * 
 	 * @param aSim	The simulation object used to simulate the conditions
 	 * specified in the protocol file.
@@ -226,7 +240,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		/*
 		 * Find the position to start at.
 		 */
-		int nValsRead = 7;
+		int nValsRead = 5;
 		int iDataStart = singleAgentData.length - nValsRead;
 		/*
 		 * This is necessary for the case when agents in a biofilm
@@ -251,14 +265,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		_radius      = Double.parseDouble(singleAgentData[iDataStart+3]);
 		_totalRadius = Double.parseDouble(singleAgentData[iDataStart+4]);
 		/*
-		 * We need to save the divRadius and the deathRadius so that they are not
-		 * re-assigned randomly when reading in agents from file.
-		 * This way, cells will divide at the same size whether the run is restarted or not.
+		 * These are randomly generated.
 		 */
-		_myDivRadius = Double.parseDouble(singleAgentData[iDataStart+5]);
-		_myDeathRadius = Double.parseDouble(singleAgentData[iDataStart+6]);
+		_myDivRadius = getDivRadius();
+		_myDeathRadius = getDeathRadius();
 		/*
-		 * Now go up the hierarchy to read the rest of the data.
+		 * Now go up the hierarchy with the rest of the data.
 		 */
 		String[] remainingSingleAgentData = new String[iDataStart];
 		for (int i=0; i<iDataStart; i++)
@@ -910,15 +922,15 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		StringBuffer tempString = super.sendHeader();
 		
 		// location info and radius
-		tempString.append(",locationX,locationY,locationZ,radius,totalRadius,divisionRadius,deathRadius");
+		tempString.append(",locationX,locationY,locationZ,radius,totalRadius,height,totalHeight");
 		
 		return tempString;
 	}
 
 	/**
-	 * \brief Used in creation of results files - creates an output string of information for this particular agent
+	 * \brief Used in creation of results files - creates an output string of information generated on this particular agent
 	 * 
-	 * Used in creation of results files - creates an output string of information for this particular agent
+	 * Used in creation of results files - creates an output string of information generated on this particular agent
 	 * 
 	 * @return	String containing results associated with this agent
 	 */
@@ -930,8 +942,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		
 		// location info and radius
 		tempString.append(","+_location.x+","+_location.y+","+_location.z+",");
-		tempString.append(_radius+","+_totalRadius+","+_myDivRadius+","+_myDeathRadius);
-		
+		tempString.append(_radius+","+_totalRadius+","+_height+","+_totalHeight);
 		
 		return tempString;
 	}
@@ -964,11 +975,25 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			_radius = ExtraMath.radiusOfASphere(_volume);
 			_totalRadius = ExtraMath.radiusOfASphere(_totalVolume);
 		}else{
-			_radius = ExtraMath.radiusOfACylinder(_volume,
-					_species.domain.length_Z);
-			_totalRadius = ExtraMath.radiusOfACylinder(_totalVolume,
-					_species.domain.length_Z);
+			
+			if(_species.speciesClass.equals("Fungus")) {
+				_height = ExtraMath.lengthOfACylinder(_volume,
+						_radius);
+				_totalHeight = ExtraMath.lengthOfACylinder(_totalVolume,
+						_totalRadius);
+			}else {
+				_radius = ExtraMath.radiusOfACylinder(_volume,
+				_species.domain.length_Z);
+				_totalRadius = ExtraMath.radiusOfACylinder(_totalVolume,
+				_species.domain.length_Z);
+			}
+			
 		}
+		/*System.out.println("\t Volume, radius, height \n");
+		System.out.println(_volume);
+		System.out.println(_radius);
+		System.out.println(_height);
+		*/
 	}
 
 	/**
@@ -1033,7 +1058,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double getRadius(boolean withCapsule)
 	{
-		return (withCapsule ? _totalRadius : _radius);
+		
+		if(_species.speciesClass.equals("Fungus")) {
+		return (withCapsule ? _totalHeight : _height);
+		}
+		else {
+			return (withCapsule ? _totalRadius : _radius);
+		}
 	}
 	
 	/**
@@ -1205,7 +1236,27 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		return _location;
 	}
-
+	
+	
+	/**
+	 * \brief Return the location + height of this  cylindrical agent.
+	 * 
+	 * @return	ContinuousVector stating the location + height of this cylindrical agent.
+	 */
+	
+	
+	
+	public ContinuousVector getLocationHeight()
+	{
+		Double xlocheight = _location.x+ _height;
+		ContinuousVector locationHeight = new ContinuousVector();
+		locationHeight.set(xlocheight, _location.y, _location.z);
+		return locationHeight;
+	}
+	
+	
+	
+	
 	/**
 	 * \brief Comparator used by AgentContainer.erodeBorder()
 	 * 

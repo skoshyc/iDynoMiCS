@@ -63,6 +63,15 @@ public class Species implements Serializable
 	public String	speciesName;
 	
 	/**
+	 * Class of the species associated with this object. Specified in the
+	 * protocol file.
+	 */
+	
+	public String speciesClass; 
+	
+	
+	
+	/**
 	 * The number of species in the simulation
 	 */
 	public int speciesIndex;
@@ -155,7 +164,8 @@ public class Species implements Serializable
 		// Name of the species as specified in the protocol file
 		speciesName = aSpRoot.getName();
 		LogFile.writeLogAlways("Initialising Species from XML: "+speciesName);
-		
+		speciesClass=aSpRoot.getStringClass();
+		System.out.println(speciesClass);
 		// colour is used to distinguish agents in POV-Ray output images - read this from the protocol file
 		String colorName = aSpRoot.getParam("color");
 		

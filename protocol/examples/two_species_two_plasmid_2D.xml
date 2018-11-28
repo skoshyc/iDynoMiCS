@@ -33,13 +33,13 @@
 		<param name="inputBulkFileURL">env_Sum(last).xml</param>
 	</input>
 	
-	<solute domain="biofilm" name="o2d">
+	<solute domain="MyBiofilm" name="o2d">
 		<param name="diffusivity" unit="m2.day-1">2.1e-4</param>
 	</solute>
-	<solute domain="biofilm" name="cod">
+	<solute domain="MyBiofilm" name="cod">
 		<param name="diffusivity" unit="m2.day-1">0.6e-4</param>
 	</solute>
-	<solute domain="biofilm" name="pressure">
+	<solute domain="MyBiofilm" name="pressure">
 		<param name="diffusivity" unit="m2.day-1">1.0</param>
 	</solute>
 
@@ -72,7 +72,7 @@
 				<param name="Sin" unit="g.L-1">0.0</param>
 			</solute>
 		</bulk>
-		<computationDomain name="biofilm">
+		<computationDomain name="MyBiofilm">
 			<grid nDim="2" nI="65" nJ="65" nK="1"/>
 			<param name="resolution" unit="um">5.0</param>
 			<param name="boundaryLayer" unit="um">25.0</param>
@@ -176,7 +176,7 @@
 		</yield>
 	</reaction>
 	
-	<solver class="Solver_multigrid" name="solver1" domain="biofilm">
+	<solver class="Solver_multigrid" name="solver1" domain="MyBiofilm">
 		<param name="active">true</param>
 		<param name="preStep">150</param>
 		<param name="postStep">150</param>
@@ -189,12 +189,12 @@
 		<reaction name="maintenance_narrow"/>
 		<reaction name="maintenance_broad"/>
 	</solver>
-	<solver class="Solver_pressure" name="pressure" domain="biofilm">
+	<solver class="Solver_pressure" name="pressure" domain="MyBiofilm">
 		<param name="active">true</param>
 	</solver>
 	
 	<agentGrid>
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<param name="resolution" unit="um">5.0</param>
 		<detachment class="DS_Quadratic">
 			<param name="kDet" unit="um-1.hour-1">200e-6</param>
@@ -210,7 +210,7 @@
 		<particle name="capsule">
 			<param name="mass" unit="fg">0.0</param>
 		</particle>
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<param name="divRadius" unit="um">0.5</param>
 		<param name="deathRadius" unit="um">0.1</param>
 		<param name="shoveFactor" unit="um">1.0</param>
@@ -221,7 +221,7 @@
 		 that all other species names do not contain it, if you want to use
 		 the python analysis scripts -->
 	<species class="Plasmid" name="BroadPlasmid">
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<!-- Default copy number when creating this plasmid. Leave as 1. -->
 		<param name="copyNumDefault">1</param>
 		<!-- Determines the maximum surface-surface distance between donor and
@@ -250,7 +250,7 @@
 		<compatiblePlasmid name="NarrowPlasmid"/>
 	</species>
 	<species class="Plasmid" name="NarrowPlasmid">
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<param name="copyNumDefault">1</param>
 		<param name="pilusLength" unit="um">5.0</param>
 		<param name="donationLag" unit="hour">5.0</param>
@@ -274,7 +274,7 @@
 		<particle name="capsule" class="EPS">
 			<param name="mass" unit="fg">0.0</param>
 		</particle>
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<param name="divRadius" unit="um">1.0</param>
 		<param name="deathRadius" unit="um">0.1</param>
 		<param name="shoveFactor" unit="um">1.1</param>
@@ -323,7 +323,7 @@
 		<particle name="capsule" class="EPS">
 			<param name="mass" unit="fg">0.0</param>
 		</particle>
-		<param name="computationDomain">biofilm</param>
+		<param name="computationDomain">MyBiofilm</param>
 		<param name="divRadius" unit="um">1.0</param>
 		<param name="deathRadius" unit="um">0.1</param>
 		<param name="shoveFactor" unit="um">1.1</param>

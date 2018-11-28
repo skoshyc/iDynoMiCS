@@ -288,11 +288,11 @@ public class Fungus extends LocatedAgent implements Cloneable
 		/*
 		 * Divide if you have to.
 		 */
-		if ( willDivide() )
-			divide();
-		/*
-		 * Die if you have to.
-		 */
+		/*if ( willDivide() )
+			divide();*/
+		
+		/* * Die if you have to.*/
+		 
 		if ( willDie() )
 		{
 			this.death = "tooSmall";

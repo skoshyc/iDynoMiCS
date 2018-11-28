@@ -334,6 +334,19 @@ public final class ExtraMath
 	}
 	
 	/**
+	 * \brief Calculate the length of a cylinder with volume v and radius r.
+	 * 
+	 * This is calculated from the area of the cross-section: v/l
+	 * 
+	 * @param volume Volume of the cylinder
+	 * @param radius Radius of the cylinder
+	 * @return Length of the cylinder
+	 */
+	public static final Double lengthOfACylinder(Double volume, Double radius)
+	{
+		return volume/(areaOfACircle(radius));
+	}
+	/**
 	 * \brief Calculate the volume of a sphere with radius r.
 	 * 
 	 * The formula for this is 4/3 * pi * r^3.

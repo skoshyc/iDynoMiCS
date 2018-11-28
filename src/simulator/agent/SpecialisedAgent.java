@@ -215,6 +215,22 @@ public abstract class SpecialisedAgent extends Agent implements HasSpecies, Clon
 	}
 	
 	/**
+	 * \brief Return the class of the species represented by this agent.
+	 * 
+	 * @return	Name of the species represented.
+	 */
+	public String getStringClass()
+	{
+		return _species.speciesClass;
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
 	 * \brief Models a mechanical interaction between two located agents.
 	 * 
 	 * Implemented by extending classes (LocatedAgent)
