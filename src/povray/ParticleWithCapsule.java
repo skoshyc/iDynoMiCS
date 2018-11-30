@@ -14,6 +14,7 @@ import java.io.Serializable;
 import simulator.geometry.ContinuousVector;
 import simulator.agent.LocatedAgent;
 
+
 /**
  * \brief Used by Povray3DScene to create a capsule object in a format that can be displayed graphically in POV-Ray output
  * 
@@ -89,8 +90,11 @@ public class ParticleWithCapsule implements Serializable
 	
 	private String _core;
 	
+	/*private VectorProperty _rotation;
 	
-	
+	Random r = new Random();
+	double randomValue = -2.0 + (4.0) * r.nextDouble();
+	*/
 	
 	/**
 	 * \brief Constructor that initialises this storage object, creating the required center and colour vector properties
@@ -101,6 +105,8 @@ public class ParticleWithCapsule implements Serializable
 		center = new VectorProperty("");
 		centerHeight = new VectorProperty("");
 		_colorCore = new VectorProperty("color rgb");
+		/*_rotation= new VectorProperty("");*/
+		/*setRotation(1.0);*/
 	}
 
 	/**
@@ -126,12 +132,9 @@ public class ParticleWithCapsule implements Serializable
 
 		setNameCore(p.getName());
 		
-		
-		
-		/*System.out.println(p.getStringClass());*/
 		_isFungus=p.getStringClass().equals("Fungus");
 		if (_isFungus) {
-			setCoreRadius(p._radius);
+			setCoreRadius(p._radius);			
 		}else {
 		setCoreRadius(p.getRadius(true));}
 		
@@ -246,6 +249,18 @@ public class ParticleWithCapsule implements Serializable
 		_radiusCore = fs/Povray3DScene.getScaling();
 		/*System.out.println(_radiusCore);*/
 	}
+	
+	
+	/*public void setRotation(double ang) {
+		_rotation.setValues(0.0, ang, 0.0);
+		System.out.println(_rotation);
+	}
+	
+	*/
+	
+	
+	
+	
 	/**
 	 * \brief Represents the information about this particle with capsule as a string
 	 * 
@@ -267,7 +282,8 @@ public class ParticleWithCapsule implements Serializable
 				 ", " + centerHeight + "\n"
 				+ "\t " + _radiusCore + "\n"
 				+ "\t pigment { " + _nameCore + "*" + _activeFrac + " }\n"
-				+ "}\n";
+				/*+ "\t rotate" + _rotation + "\n"
+*/				+ "}\n";
 		}else {
 			_core = "sphere {\n"
 			+ "\t "	+ center + "\n"

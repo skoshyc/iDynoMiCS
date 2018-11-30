@@ -24,7 +24,7 @@ import simulator.geometry.ContinuousVector;
 import simulator.geometry.Domain;
 import simulator.geometry.boundaryConditions.AllBC;
 import simulator.geometry.boundaryConditions.BoundaryCyclic;
-
+import java.util.Random;
 /**
  * \brief Extends ActiveAgent by adding functionality to control agent grid
  * location, agent shoving, agent death and division, and agent movement.
@@ -1249,8 +1249,10 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public ContinuousVector getLocationHeight()
 	{
 		Double xlocheight = _location.x+ _height;
+		Double ylocheight =_location.y+2.0*Math.random();
+		/*System.out.println(ylocheight);*/
 		ContinuousVector locationHeight = new ContinuousVector();
-		locationHeight.set(xlocheight, _location.y, _location.z);
+		locationHeight.set(xlocheight, ylocheight, _location.z);
 		return locationHeight;
 	}
 	
