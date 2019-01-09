@@ -215,6 +215,14 @@ public class XMLParser implements Serializable
 		return getAttribute("name");
 	}
 	
+	
+	/**
+	 * \brief Gets the class of this Element.
+	 * 
+	 * Same as getAttribute("name"). Created as used very often
+	 * 
+	 * @return The class of the Element, as a String.
+	 */
 	public String getStringClass()
 	{
 		return getAttribute("class");

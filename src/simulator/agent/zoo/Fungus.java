@@ -72,6 +72,10 @@ public class Fungus extends LocatedAgent implements Cloneable
 	 * created when the capsule is excreted.
 	 */
 	protected Species _epsSpecies;
+	
+	
+	
+	
 
 	/**
 	 * \brief Constructor used to generate progenitor and initialise an object

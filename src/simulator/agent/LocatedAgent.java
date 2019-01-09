@@ -69,7 +69,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double _totalHeight = 10.0;
 	
+	/**
+	 * Direction of the hypha
+	 */
 	
+	public Double _directionx = Math.random();
+	
+	public Double _directiony = Math.random();
 	
 	
 	
@@ -1248,9 +1254,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	
 	public ContinuousVector getLocationHeight()
 	{
-		Double xlocheight = _location.x+ _height;
-		Double ylocheight =_location.y+2.0*Math.random();
-		/*System.out.println(ylocheight);*/
+		Double xlocheight = _location.x+ _directionx *_height;
+		/* The 2.0 * Math.random() is inserted to slant the position of the hyphal agent*/
+		/*Double ylocheight =_location.y+2.0*Math.random();*/ 
+		Double ylocheight =_location.y+_directiony;
+		/*System.out.println(_directionx);
+		System.out.println(_directiony);*/
 		ContinuousVector locationHeight = new ContinuousVector();
 		locationHeight.set(xlocheight, ylocheight, _location.z);
 		return locationHeight;

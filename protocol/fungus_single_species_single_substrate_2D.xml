@@ -542,7 +542,7 @@
 		<initArea number="20">
 			<param name="birthday" unit="hour">0</param>
 			<coordinates x="0" y="0" z="0"/>
-			<coordinates x="4" y="264" z="0"/>
+			<coordinates x="0" y="264" z="0"/>
 		</initArea>
 	</species>
 
