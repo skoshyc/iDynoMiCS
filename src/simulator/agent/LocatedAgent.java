@@ -1114,7 +1114,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double getShoveRadius()
 	{
-		return _totalRadius * getShoveFactor();
+		if(_species.speciesClass.equals("Fungus")) {
+			return _height * getShoveFactor(); 
+		}
+		else {
+		return _totalRadius * getShoveFactor();}
 	}
 	
 	/**

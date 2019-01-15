@@ -119,7 +119,6 @@ public class ParticleWithCapsule implements Serializable
 		center = new VectorProperty("");
 		setCenter(p.getLocation());
 		
-		
 		centerHeight = new VectorProperty("");
 		setCenterHeight(p.getLocationHeight());
 			
