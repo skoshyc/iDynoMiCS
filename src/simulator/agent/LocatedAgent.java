@@ -104,6 +104,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	protected ContinuousVector _location = new ContinuousVector();
 	
+	/***
+	 * Agent position with height-continuous coordinates
+	 */
+	protected ContinuousVector locationHeight = new ContinuousVector();
+	
 	/**
 	 * ContinuousVector noting the move that will be applied to the agents position.
 	 */
@@ -580,6 +585,8 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			}
 			this._movement.subtract(diff);
 		}
+		/*System.out.println(diff);
+		System.out.println(delta);*/
 	}
 
 	/**
@@ -791,6 +798,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		Double delta = _movement.norm();
 		_movement.reset();
+		/*if(_species.speciesClass.equals("Fungus")) {
+			System.out.println("hello");
+			return delta/_totalHeight;
+		}
+		else {}*/
 		return delta/_totalRadius;
 	}
 
@@ -1115,7 +1127,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public Double getShoveRadius()
 	{
 		if(_species.speciesClass.equals("Fungus")) {
-			return _height * getShoveFactor(); 
+			return _height * _directiony * getShoveFactor(); 
 		}
 		else {
 		return _totalRadius * getShoveFactor();}
@@ -1264,9 +1276,21 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		Double ylocheight =_location.y+_directiony;
 		/*System.out.println(_directionx);
 		System.out.println(_directiony);*/
-		ContinuousVector locationHeight = new ContinuousVector();
+		
 		locationHeight.set(xlocheight, ylocheight, _location.z);
 		return locationHeight;
+	}
+	
+	
+	/**
+	 * \brief Return the slope of the cylindrical axis assuming its along the z axis
+	 * 
+	 * @return slope
+	 *  */
+	
+	public Double slopeaxis() {
+		Double slope = (locationHeight.y - _location.y)/(locationHeight.x - _location.y);
+		return slope;
 	}
 	
 	
