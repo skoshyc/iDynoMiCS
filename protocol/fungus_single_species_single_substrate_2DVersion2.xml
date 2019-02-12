@@ -46,10 +46,10 @@
 			simulation will end. -->
 		<timeStep>
 			<param name="adaptive">false</param>
-			<param name="timeStepIni" unit="hour">1</param>
+			<param name="timeStepIni" unit="hour">0.5</param>
 			<param name="timeStepMin" unit="hour">0.05</param>
 			<param name="timeStepMax" unit="hour">1</param>
-			<param name="endOfSimulation" unit="day">3</param>
+			<param name="endOfSimulation" unit="day">1</param>
 		</timeStep>
 
 		<!-- Attachment scenario - can be 'onetime', where the cells attach to the substratum initially (as in traditional iDynoMiCS)		
@@ -115,13 +115,13 @@
 	-->
 
 	<particle name="biomass">
-		<param name="density" unit="g.L-1">150</param>
+		<param name="density" unit="g.L-1">50</param>
 	</particle>
 	<particle name="inert">
-		<param name="density" unit="g.L-1">150</param>
+		<param name="density" unit="g.L-1">50</param>
 	</particle>
 	<particle name="capsule">
-		<param name="density" unit="g.L-1">75</param>
+		<param name="density" unit="g.L-1">5</param>
 	</particle>
 
 
@@ -515,7 +515,7 @@
 		-->
 
 
-	<species class="Bacterium" name="MyHeterotroph">
+	<species class="Fungus" name="MyHeterotroph">
 		<particle name="biomass">
 			<param name="mass" unit="fg">0</param>
 		</particle>
@@ -531,18 +531,18 @@
 		<param name="deathRadiusCV">0.1</param>
 		<param name="babyMassFrac">0.5</param>
 		<param name="babyMassFracCV">0.05</param>
-		<param name="shoveFactor" unit="um">1.15</param>
-		<param name="shoveLimit" unit="um">0.</param>
+		<param name="shoveFactor" unit="um">2</param>
+		<param name="shoveLimit" unit="um">0</param>
 
-		<param name="epsMax">0.1</param>
+		<param name="epsMax">1</param>
 		<param name="kHyd" unit="hr-1">0.007</param>
 
 		<reaction name="MyGrowthHeterotrophs" status="active"/>
 
-		<initArea number="10">
+		<initArea number="50">
 			<param name="birthday" unit="hour">0</param>
 			<coordinates x="0" y="0" z="0"/>
-			<coordinates x="4" y="264" z="0"/>
+			<coordinates x="0" y="264" z="0"/>
 		</initArea>
 	</species>
 

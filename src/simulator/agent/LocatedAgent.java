@@ -62,12 +62,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	/**
 	 * Height of this agent.
 	 */
-	public Double _height = 10.0;
+	public Double _height = 2*_radius;
 	
 	/**
 	 * Cell Height including any capsules.
 	 */
-	public Double _totalHeight = 10.0;
+	public Double _totalHeight = 2*_totalRadius;
 	
 	/**
 	 * Direction of the hypha
@@ -77,7 +77,10 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	
 	public Double _directiony = Math.random();
 	
-	
+	/**
+	 * Random number generator to add or subtract the directions. Used in getLocationHeight()
+	 */
+	public static Random random= new Random();
 	
 	/**
 	 * Radius at which this agent will divide.
@@ -132,6 +135,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	/**
 	 * Boolean noting whether this agent is interacting with a surface (true)
 	 * or not (false).
+	 * 
 	 */
 	protected Boolean _isAttached = false;
 
@@ -563,15 +567,26 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		if ( aNeighbor == this )
 			return;
+		ContinuousVector diff=new ContinuousVector();
+		Double delta;
+		if(this.getStringClass().equals("Fungus")||aNeighbor.getStringClass().equals("Fungus")) {
+			diff = computeDifferenceAxis(aNeighbor);
+			/*
+			 * Compute effective cell-cell distance.
+			 */
+			 delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
+		}
+		else {
+		
 		/*
 		 * Find the vector from your neighbour's cell centre to your cell
-		 * centre.
+		 * centre. This is for spherical agents
 		 */
-		ContinuousVector diff = computeDifferenceVector(aNeighbor);
+			diff = computeDifferenceVector(aNeighbor);
 		/*
 		 * Compute effective cell-cell distance.
 		 */
-		Double delta = diff.norm() - getInteractDistance(aNeighbor);
+			delta = diff.norm() - getInteractDistance(aNeighbor);}
 		/*
 		 * Apply the shoving calculated. If it's mutual, apply half to each.
 		 */
@@ -689,6 +704,138 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		return diff;
 	}
 	
+	
+	/**
+	 * \brief Computes the shortest vector between two axes of the cylinders. Assumes cyclic boundaries.
+	 * The algorithm is based on "On Fast Computation of distance
+	 * between line segments" by Lumelsky,1985.
+	 * If the vector is all zero's, returns a vector of random direction and
+	 * length = 0.01 * radius.
+	 * 
+	 
+	 * @params LocatedAgent aLoc1, aLoc2
+	 * @return The shortest movement vector to go from axis a to axis b, taking into
+	 * account the cyclic boundary.
+	 **/
+	public ContinuousVector computeDifferenceAxis(LocatedAgent aLoc)
+	{
+		Double gridLength;
+		ContinuousVector diff = new ContinuousVector();
+		ContinuousVector d1 = new ContinuousVector();
+		ContinuousVector d2 = new ContinuousVector();
+		ContinuousVector d12 = new ContinuousVector();
+		ContinuousVector c1 = new ContinuousVector();
+		ContinuousVector c2 = new ContinuousVector();
+		Double t;
+		Double u;
+		
+		
+		d1.sendDiff(locationHeight,_location);
+		d2.sendDiff(aLoc.locationHeight,aLoc._location);
+		d12.sendDiff(aLoc._location,_location);
+		/*System.out.println(d1);
+		System.out.println(d2);
+		System.out.println(d12);*/
+		Double R = d1.prodScalar(d2);
+		Double D1 = d1.prodScalar(d1);
+		Double D2 = d2.prodScalar(d2);
+		Double S1 = d1.prodScalar(d12);
+		Double S2 = d2.prodScalar(d12);
+		if(D1<=0 && D2 <=0){
+			t=0.0;
+			u=0.0;
+			diff.sendDiff(_location,aLoc._location);
+		}
+		
+		if(D1<=0){ //First line segment is a point
+			t=0.0;
+			u=-S2/D2;
+			u=Clamp(u,0.0,1.0);
+		}
+		else{
+			if(D2<=0){ // second line segment is a point
+				u=0.0;
+				t=S1/D1;
+				t=Clamp(t,0.0,1.0);
+			}
+			else{
+				//Both line segments are not points
+				Double denom = (D1*D2)-(R*R);
+				if(denom != 0){ 
+					t=(S1*D2-S2*R)/denom;
+					t=Clamp(t,0.0,1.0);
+				}
+				else{ // Lines are parallel
+					t=0.0;
+				}
+				u=(t*R-S2)/D2;
+				//To check if u is in [0,1]
+				if(u<0.0){
+					u=0.0;
+					t=S1/D1;
+					t=Clamp(t,0.0,1.0);
+				}
+				else{
+					if(u>1.0){
+						u=1.0;
+						t=(R+S1)/D1;
+						t=Clamp(t,0.0,1.0);
+					}
+				}
+				
+			}
+			d1.times(t);
+			c1.sendSum(_location, d1);
+			d2.times(u);
+			c2.sendSum(aLoc._location, d2);
+			diff.sendDiff(c1,c2);
+			return diff;
+		}
+		/* * Check periodicity in X.*/
+		 
+		gridLength = _species.domain.length_X;
+		if ( Math.abs(diff.x) > 0.5 * gridLength )
+			diff.x -= Math.signum(diff.x) * gridLength;
+		
+		 /** Check periodicity in Y.*/
+		 
+		gridLength = _species.domain.length_Y;
+		if ( Math.abs(diff.y) > 0.5 * gridLength )
+			diff.y -= Math.signum(diff.y) * gridLength;
+		
+		/* * Check periodicity in Z.*/
+		 
+		if (_agentGrid.is3D)
+		{
+			gridLength = _species.domain.length_Z;
+			if (Math.abs(diff.z) > 0.5 * gridLength)
+				diff.z -= Math.signum(diff.z) * gridLength;
+		}
+		
+		/* * If this is a zero vector, give it random direction and a norm of
+		 * 0.01 * radius.*/
+		 
+		if ( diff.isZero() )
+		{
+			diff.alea(_agentGrid.is3D);
+			diff.normalizeVector(0.01*_radius);
+		}
+		return diff;
+	}
+	
+	/* 
+	 * Clamp function relates to equation 12 in the Lumelsky paper
+	 * Restricts t and u to lie within [min,max]
+	 * param: variable, min, max
+	 * returns variable restricted to the interval
+	 */
+	public Double Clamp(Double var,Double min,Double max) {
+		if(var < min) {var=min;}
+		if(var > max) {var=max;}
+		return var;
+	}
+	
+	
 	/**
 	 * 
 	 * @param aLoc
@@ -696,8 +843,16 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public ContinuousVector computeDifferenceVector(LocatedAgent aLoc)
 	{
+		/*if(aLoc.getStringClass().equals("Fungus")) {
+			return computeDifferenceAxis(aLoc._location,aLoc.locationHeight);
+		}
+		else {}*/
 		return computeDifferenceVector(aLoc._location);
 	}
+	
+	
+	
+	
 	
 	/**
 	 * \brief Find neighbouring agents in a range around you.
@@ -792,18 +947,21 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 * Now apply the movement.
 		 */
 		setLocation(getVerifiedLocationFromMovement(_movement));
+		if(_species.speciesClass.equals("Fungus")) {
+			setLocationHeight(getVerifiedLocationHeightFromMovement(_movement));
+			}
 		_agentGrid.registerMove(this);
 		/*
 		 * Calculate how far we've traveled relative to the total radius.
 		 */
 		Double delta = _movement.norm();
 		_movement.reset();
-		/*if(_species.speciesClass.equals("Fungus")) {
-			System.out.println("hello");
+		if(_species.speciesClass.equals("Fungus")) {
+			//System.out.println("hello");
 			return delta/_totalHeight;
 		}
-		else {}*/
-		return delta/_totalRadius;
+		else {
+		return delta/_totalRadius;}
 	}
 
 	/**
@@ -813,6 +971,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public ContinuousVector getVerifiedLocationFromMovement(ContinuousVector movement) {
 		// Search a boundary which will be crossed
 		ContinuousVector newLoc = new ContinuousVector(_location);
+		newLoc.add(movement);
+		return getVerifiedLocation(newLoc);
+	}
+	
+	public ContinuousVector getVerifiedLocationHeightFromMovement(ContinuousVector movement) {
+		// Search a boundary which will be crossed
+		ContinuousVector newLoc = new ContinuousVector(locationHeight);
 		newLoc.add(movement);
 		return getVerifiedLocation(newLoc);
 	}
@@ -940,7 +1105,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		StringBuffer tempString = super.sendHeader();
 		
 		// location info and radius
-		tempString.append(",locationX,locationY,locationZ,radius,totalRadius,height,totalHeight");
+		if(_species.speciesClass.equals("Fungus")) {
+		tempString.append(",locationX,locationY,locationZ,radius,totalRadius,height,totalHeight");}
+		else {
+			tempString.append(",locationX,locationY,locationZ,radius,totalRadius");
+		}
 		
 		return tempString;
 	}
@@ -957,10 +1126,15 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		// write the data matching the header file
 		StringBuffer tempString = super.writeOutput();
-		
+		if(_species.speciesClass.equals("Fungus")) {
 		// location info and radius
 		tempString.append(","+_location.x+","+_location.y+","+_location.z+",");
-		tempString.append(_radius+","+_totalRadius+","+_height+","+_totalHeight);
+		tempString.append(_radius+","+_totalRadius+","+_height+","+_totalHeight);}
+		else {
+			// location info and radius
+			tempString.append(","+_location.x+","+_location.y+","+_location.z+",");
+			tempString.append(_radius+","+_totalRadius);
+		}
 		
 		return tempString;
 	}
@@ -1126,11 +1300,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double getShoveRadius()
 	{
-		if(_species.speciesClass.equals("Fungus")) {
-			return _height * _directiony * getShoveFactor(); 
+		/*if(_species.speciesClass.equals("Fungus")) {
+			return _totalHeight * getShoveFactor(); 
 		}
-		else {
-		return _totalRadius * getShoveFactor();}
+		else {}*/
+		return _totalRadius * getShoveFactor();
 	}
 	
 	/**
@@ -1270,29 +1444,37 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	
 	public ContinuousVector getLocationHeight()
 	{
-		Double xlocheight = _location.x+ _directionx *_height;
-		/* The 2.0 * Math.random() is inserted to slant the position of the hyphal agent*/
-		/*Double ylocheight =_location.y+2.0*Math.random();*/ 
-		Double ylocheight =_location.y+_directiony;
-		/*System.out.println(_directionx);
-		System.out.println(_directiony);*/
-		
-		locationHeight.set(xlocheight, ylocheight, _location.z);
-		return locationHeight;
+		if(_species.speciesClass.equals("Fungus")) {
+			Double xlocheight = _location.x+ _directionx *_height;
+			/* The 2.0 * Math.random() is inserted to slant the position of the hyphal agent*/
+			/*Double ylocheight =_location.y+2.0*Math.random();*/ 
+			Double ylocheight =_location.y+ (random.nextBoolean() ? 1 : -1 )* _directiony;
+			/*System.out.println(_directionx);
+			System.out.println(_directiony);
+			System.out.println(xlocheight);
+			System.out.println(ylocheight);*/
+			
+			locationHeight.set(xlocheight, ylocheight, _location.z);
+			return locationHeight;
+		}
+		else {
+			locationHeight.set(_location); /* If the species is not fungus, it will be spherical */
+			return locationHeight;
+		}
 	}
 	
 	
 	/**
 	 * \brief Return the slope of the cylindrical axis assuming its along the z axis
 	 * 
-	 * @return slope
-	 *  */
+ * @return slope
+ *  */
 	
-	public Double slopeaxis() {
+	/*public Double slopeaxis() {
 		Double slope = (locationHeight.y - _location.y)/(locationHeight.x - _location.y);
 		return slope;
 	}
-	
+	*/
 	
 	
 	
@@ -1349,7 +1531,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double getDistance(LocatedAgent aLoc)
 	{
-		return getDistance(aLoc._location);
+		if(aLoc.getStringClass().equals("Fungus")) {
+			ContinuousVector gd=computeDifferenceAxis(aLoc);
+			return gd.norm();
+		}else {
+		return getDistance(aLoc._location);}
 	}
 
 	/**
@@ -1365,7 +1551,20 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		else
 			_location.set(cc);
 	}
-
+	
+	/**
+	 * \brief Set the location of the top of the cylindrical agent to the supplied continuous vector.
+	 * 
+	 * @param cc	Location of the top of cylindrical agent should be assigned to.
+	 */
+	public void setLocationHeight(ContinuousVector cc) 
+	{
+		// In a chemostat set the location of the newborns to zero.
+		if ( Simulator.isChemostat )
+			locationHeight.reset();
+		else
+			locationHeight.set(cc);
+	}
 	/**
 	 * \brief Return the continuous vector that states this agents move.
 	 * 

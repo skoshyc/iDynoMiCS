@@ -73,7 +73,7 @@ A few general points about protocol files:
 
 	<simulator>
         <!-- Set "quietMode" to true if you don't need the log file (saves space and simulation runs slightly faster) -->
-        <param name="quietMode">true</param>
+        <param name="quietMode">false</param>
 		<!-- change this parameter to 'true' for restarting runs from within
 			a results folder-->
 		<param name="restartPreviousRun">false</param>
@@ -93,10 +93,10 @@ A few general points about protocol files:
 			simulation will end. -->
 		<timeStep>
 			<param name="adaptive">true</param>
-			<param name="timeStepIni" unit="hour">1</param>
+			<param name="timeStepIni" unit="hour">0.5</param>
 			<param name="timeStepMin" unit="hour">0.05</param>
 			<param name="timeStepMax" unit="hour">1.0</param>
-			<param name="endOfSimulation" unit="day">1</param>
+			<param name="endOfSimulation" unit="day">2</param>
 		</timeStep>
 
 		<!-- Attachment scenario - can be 'onetime', where the cells attach to the substratum initially (as in traditional iDynoMiCS)		
@@ -428,7 +428,7 @@ A few general points about protocol files:
 		<param name="deathRadiusCV">0.1</param>
 		<param name="babyMassFrac">0.5</param>
 		<param name="babyMassFracCV">0.05</param>
-		<param name="shoveFactor" unit="um">1.15</param>
+		<param name="shoveFactor" unit="um">1.5</param>
 		<param name="shoveLimit" unit="um">0.0</param>
 
 		<param name="epsMax">0.1</param>
@@ -437,7 +437,7 @@ A few general points about protocol files:
 		<reaction name="MyGrowthGordonii" status="active"/>
 		<reaction name="myInactivationGordonii" status="active"/>
 
-		<initArea number="30">
+		<initArea number="50">
 			<param name="birthday" unit="hour">0.0</param>
 			<coordinates x="0.0" y="0.0" z="0.0"/>
 			<coordinates x="1.0" y="264.0" z="0.0"/>
@@ -460,7 +460,7 @@ A few general points about protocol files:
 		<param name="deathRadiusCV">0.1</param>
 		<param name="babyMassFrac">0.5</param>
 		<param name="babyMassFracCV">0.05</param>
-		<param name="shoveFactor" unit="um">3</param>
+		<param name="shoveFactor" unit="um">2</param>
 		<param name="shoveLimit" unit="um">0</param>
 
 		<param name="epsMax">1</param>
@@ -468,10 +468,10 @@ A few general points about protocol files:
 
 		<reaction name="MyGrowthFungus" status="active"/>
 
-		<initArea number="15">
+		<initArea number="5">
 			<param name="birthday" unit="hour">0</param>
 			<coordinates x="0" y="0" z="0"/>
-			<coordinates x="1.0" y="264" z="0"/>
+			<coordinates x="0.0" y="128" z="0"/>
 		</initArea>
 	</species>
 	
