@@ -19,6 +19,7 @@ import java.util.*;
 import simulator.geometry.ContinuousVector;
 import simulator.geometry.boundaryConditions.*;
 import simulator.agent.*;
+import simulator.Simulator;
 
 /**
  * \brief Creates a union with a box (the biofilm carrier) and spheres (the bacteria), creating a 3D scene for the PovRay rendering engine
@@ -291,7 +292,7 @@ public class Biofilm3D implements Serializable
 	 */
 	protected void particlesToFile(FileWriter f) throws IOException {
 		for (Agent anAgent : _pov.mySim.agentGrid.agentList) {
-			ParticleWithCapsule s = new ParticleWithCapsule((LocatedAgent)anAgent);
+			ParticleWithCapsule s = new ParticleWithCapsule((LocatedAgent)anAgent,_pov);
 			f.write(s.toString());
 		}
 	}

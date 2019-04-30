@@ -46,10 +46,10 @@
 			simulation will end. -->
 		<timeStep>
 			<param name="adaptive">false</param>
-			<param name="timeStepIni" unit="hour">0.5</param>
+			<param name="timeStepIni" unit="hour">1</param>
 			<param name="timeStepMin" unit="hour">0.05</param>
 			<param name="timeStepMax" unit="hour">1</param>
-			<param name="endOfSimulation" unit="day">1</param>
+			<param name="endOfSimulation" unit="day">2</param>
 		</timeStep>
 
 		<!-- Attachment scenario - can be 'onetime', where the cells attach to the substratum initially (as in traditional iDynoMiCS)		
@@ -542,7 +542,7 @@
 		<initArea number="50">
 			<param name="birthday" unit="hour">0</param>
 			<coordinates x="0" y="0" z="0"/>
-			<coordinates x="0" y="264" z="0"/>
+			<coordinates x="1" y="256" z="0"/>
 		</initArea>
 	</species>
 

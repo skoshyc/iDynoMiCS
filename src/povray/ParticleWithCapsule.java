@@ -11,8 +11,15 @@ package povray;
 
 import java.awt.Color;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 import simulator.geometry.ContinuousVector;
+import simulator.Simulator;
 import simulator.agent.LocatedAgent;
+import simulator.agent.SpecialisedAgent;
+import simulator.AgentContainer;
 
 
 /**
@@ -24,7 +31,7 @@ import simulator.agent.LocatedAgent;
  * @author Laurent Lardon (lardonl@supagro.inra.fr), INRA, France
  *
  */
-public class ParticleWithCapsule implements Serializable
+public class ParticleWithCapsule implements Serializable 
 {
 	/**
 	 * Serial version used for the serialisation of the class
@@ -76,7 +83,8 @@ public class ParticleWithCapsule implements Serializable
 	 */
 	private boolean _hasCapsule;
 	
-	
+	public int[] count1;
+	//List<Integer> count = new ArrayList<>();
 	
 	/**
 	 * Boolean noting whether this agent is Fungus
@@ -89,7 +97,10 @@ public class ParticleWithCapsule implements Serializable
 	private double _activeFrac;
 	
 	private String _core;
-	
+	/**
+	 * Container for all agents (even the non located ones)
+	 */
+	public LinkedList<SpecialisedAgent> agentList;
 	/*private VectorProperty _rotation;
 	
 	Random r = new Random();
@@ -114,23 +125,35 @@ public class ParticleWithCapsule implements Serializable
 	 * 
 	 * Constructor that initialises this storage object with a specific LocatedAgent, creating the required center and colour vector properties
 	 */
-	public ParticleWithCapsule(LocatedAgent p) 
+	public ParticleWithCapsule(LocatedAgent p, Povray3DScene pov) 
 	{
 		center = new VectorProperty("");
 		setCenter(p.getLocation());
 		
 		centerHeight = new VectorProperty("");
 		setCenterHeight(p.getLocationHeight());
-			
+		//System.out.println(centerHeight);	
 		
 		_colorCore = new VectorProperty("color rgb");
 		setColorCore(p.getColor());
+		/*System.out.println(count);
+		count.add(0);
+		
+		int spIndex;
+ 		spIndex = p.speciesIndex;
+ 		int c1=count.get(spIndex);//get an element from a list
+ 		c1++;
+ 		count.set(spIndex, c1);//to set the list element
+ 		System.out.println(count.get(spIndex));*/
+		/*count1=count(pov);*/
+		//System.out.println(count1);	
+		
 		
 
 		// bvm 27.1.2009 for using color definitions
 
 		setNameCore(p.getName());
-		
+		System.out.print(p.speciesIndex);
 		_isFungus=p.getStringClass().equals("Fungus");
 		if (_isFungus) {
 			setCoreRadius(p._radius);			
@@ -152,8 +175,49 @@ public class ParticleWithCapsule implements Serializable
 			// bvm 27.1.2009 for using color definitions
 			setNameCapsule(p.getSpecies().speciesName+"-capsule");
 		}
+		
+		
 	}
+	
+	/*public int[] count(Povray3DScene pov) 
+	{
+	  int	nSpecies = pov.mySim.speciesList.size();
+	 
+	  agentList= pov.mySim.agentGrid.agentList ;
+	  //System.out.println(agentList.size());
+	  int[] spPop = new int[nSpecies];
 
+		//System.out.println(spPop);
+		
+ 		int spIndex;
+ 		for (SpecialisedAgent anAgent : agentList)
+ 		{
+ 			spIndex = anAgent.getSpecies().speciesIndex;
+ 			spPop[spIndex]++;
+ 			// Skip to the next agent if this one is dead
+ 			// TODO RC - do we really want to include dead agents in the
+ 			// population count?
+ 			if (anAgent.isDead)
+ 				continue;	
+ 		}	
+ 		//count=spPop;
+ 		System.out.println(spPop);
+ 		return spPop;	
+
+	}
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	/**
 	 * \brief Set the colour to be used for the core of this agent from the colour specified
 	 * 
@@ -246,7 +310,6 @@ public class ParticleWithCapsule implements Serializable
 	 */
 	public void setCoreRadius(double fs) {
 		_radiusCore = fs/Povray3DScene.getScaling();
-		/*System.out.println(_radiusCore);*/
 	}
 	
 	
@@ -273,7 +336,16 @@ public class ParticleWithCapsule implements Serializable
 		// bvm 27.1.2009: modified this output to use color definitions and
 		// textures rather than pigments
 		
-		
+		//In idynomics x-axis is vertical axis and y is the horizontal. 
+		 //translate is used to move an object along the axes.
+		/*text {
+		    ttf "timrom.ttf" "agent=1" 0.005, 0.00001*x
+		    pigment { Red }  
+		    rotate<180,0,90>
+		    translate -0.55*y 
+		    translate 0.2*x  
+		    scale 0.025  //scale the image down
+		  }*/
 
 		if (_isFungus) {
 			 _core = "cylinder {\n"
@@ -281,8 +353,8 @@ public class ParticleWithCapsule implements Serializable
 				 ", " + centerHeight + "\n"
 				+ "\t " + _radiusCore + "\n"
 				+ "\t pigment { " + _nameCore + "*" + _activeFrac + " }\n"
-				/*+ "\t rotate" + _rotation + "\n"
-*/				+ "}\n";
+				/*+ "\t rotate" + _rotation + "\n"*/
+				+ "}\n";
 		}else {
 			_core = "sphere {\n"
 			+ "\t "	+ center + "\n"

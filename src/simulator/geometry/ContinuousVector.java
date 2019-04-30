@@ -272,7 +272,21 @@ public class ContinuousVector implements Cloneable
 	{
 		add(-cV.x, -cV.y, -cV.z);
 	}
-
+	
+	/**
+	 * \brief Subtract points X,Y,Z to their respective point in this vector.
+	 * 
+	 * @param x	X coordinate.
+	 * @param y Y coordinate.
+	 * @param z	Z coordinate.
+	 */
+	public void subtract(Double x, Double y, Double z)
+	{
+		this.x -= x;
+		this.y -= y;
+		this.z -= z;
+	}
+	
 	/**
 	 * \brief Store in this vector the difference of two other continuous
 	 * vectors.

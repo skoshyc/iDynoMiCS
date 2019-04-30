@@ -816,7 +816,27 @@ public class AgentContainer
 			//anAgent.death = "overBoard";
 			anAgent.die(false);
 		}
+		/*if(anAgent.getStringClass().equals("Fungus")) {
+			int newIndex1 = getIndexedPosition(anAgent.getLocationHeight());
+			int oldIndex1 = anAgent.getGridIndex();
+			
+			 * If gridIndex has changed, update the references.
+			 
+			LogFile.writeLogDebug("Debugging AgentContainer.registerMove()");
+			if ( isValid(anAgent.getLocationHeight()) )
+			{
+				LogFile.writeLogDebug("Agent locationheight "+
+									anAgent.getLocationHeight().toString()+"is valid");
+				if ( newIndex1 != oldIndex1 )
+				{
+					_grid[oldIndex1].remove(anAgent);
+					_grid[newIndex1].add(anAgent);
+					anAgent.setGridIndex(newIndex1);
+				}
+			}
+		}*/
 	}
+	
 	
 	/**
 	 * \brief Iterates through each square of the agent grid to calculate
@@ -1022,7 +1042,6 @@ public class AgentContainer
  			 		spConjugEvents[spIndex] += anEpiBac.plasmidVector.size();
  			}
  			/* <------- HGT Sonia End ------> */
- 			
  		}
  		
  		for (Species aSpecies : aSim.speciesList)

@@ -20,8 +20,12 @@ import utils.ExtraMath;
 import utils.LogFile;
 import utils.XMLParser;
 import simulator.*;
+import simulator.geometry.CollisionEngine;
 import simulator.geometry.ContinuousVector;
 import simulator.geometry.Domain;
+import simulator.geometry.EuclideanVector;
+import simulator.geometry.Quaternion;
+//import simulator.geometry.EuclideanVector;
 import simulator.geometry.boundaryConditions.AllBC;
 import simulator.geometry.boundaryConditions.BoundaryCyclic;
 import java.util.Random;
@@ -76,6 +80,16 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public Double _directionx = Math.random();
 	
 	public Double _directiony = Math.random();
+	
+	public static double distance = 0; //stores the latest calculated distance
+	public static double[] intersectionPoints[] = {{0,0,0},{0,0,0}};
+	/**
+	 * @uml.property  name="intersectionPointsV"
+	 * @uml.associationEnd  multiplicity="(0 -1)"
+	 */
+	public static ContinuousVector[] intersectionPointsV = new ContinuousVector[2];
+	
+	
 	
 	/**
 	 * Random number generator to add or subtract the directions. Used in getLocationHeight()
@@ -570,11 +584,60 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		ContinuousVector diff=new ContinuousVector();
 		Double delta;
 		if(this.getStringClass().equals("Fungus")||aNeighbor.getStringClass().equals("Fungus")) {
+			//Going to check the angle first
+			/* verify intersection of capsules */
+			ContinuousVector bactMe = new ContinuousVector(); 
+			bactMe.sendDiff(locationHeight,_location);//top-bottom
+			ContinuousVector bactHim = new ContinuousVector();
+			bactHim.sendDiff(aNeighbor.locationHeight,aNeighbor._location);
+			
+			
+	   		double angle = bactMe.angle(bactHim);
+	   		// if vector are in opposite direction the algorithm fails.
+	   		if (angle < 0)
+	   			bactHim.sendDiff(aNeighbor._location,aNeighbor.locationHeight);	
 			diff = computeDifferenceAxis(aNeighbor);
 			/*
 			 * Compute effective cell-cell distance.
 			 */
 			 delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
+
+			 if ( delta < 0.0 )
+				{
+				//calculate translation and rotation
+					EuclideanVector forceMe = new EuclideanVector(intersectionPointsV[0],intersectionPointsV[1]);
+					double newMag = forceMe.magnitude - (2* _radius);
+					forceMe = forceMe.Normalize();
+					forceMe = new EuclideanVector(forceMe.start,forceMe.mag_x * newMag, 
+					forceMe.mag_y * newMag, forceMe.mag_z * newMag);
+					
+					//forceMe.Times(0.5f);
+						
+					double[] _center = {_location.x,_location.y,_location.z};
+					EuclideanVector N = new  EuclideanVector(forceMe.end,_center);
+					EuclideanVector T = forceMe.CrossProduct(N);;
+					this.rotationAngle += /*=*/ CollisionEngine.applyForceToCapsule(
+					this._location, new EuclideanVector(_location,locationHeight),
+					_radius, forceMe, -1, null);
+					torque = /*T;*/torque.Plus(T);
+					//System.out.println(this.rotationAngle+"");
+					double gain=0.1; //from iDynoBacillus.simulator.agent.LocatedAgent.addSpringAttachment			
+					if (isMutual) {
+						forceMe.Times(0.5f);
+						this.rotationAngle *= 0.5;
+						forceMe = forceMe.Times(gain);
+						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
+
+						aNeighbor.rotationAngle -= rotationAngle; //= rotationAngle;
+						aNeighbor.torque = /*T;*/aNeighbor.torque.Minus(T);
+
+						aNeighbor.rotationAngle *= 0.5;
+						aNeighbor._movement.subtract(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);;
+					} else {
+						forceMe = forceMe.Times(gain);
+						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
+					}
+				}
 		}
 		else {
 		
@@ -586,7 +649,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		/*
 		 * Compute effective cell-cell distance.
 		 */
-			delta = diff.norm() - getInteractDistance(aNeighbor);}
+			delta = diff.norm() - getInteractDistance(aNeighbor);
+			
+		
+		/*System.out.println(aNeighbor._movement);
+		System.out.println(this._movement);*/
 		/*
 		 * Apply the shoving calculated. If it's mutual, apply half to each.
 		 */
@@ -600,6 +667,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			}
 			this._movement.subtract(diff);
 		}
+	}
 		/*System.out.println(diff);
 		System.out.println(delta);*/
 	}
@@ -745,6 +813,14 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			t=0.0;
 			u=0.0;
 			diff.sendDiff(_location,aLoc._location);
+			double[] C1= {_location.x,_location.y,_location.z};
+			double[] C2= {aLoc._location.x,aLoc._location.y,aLoc._location.z};
+			/**/
+			intersectionPoints[0] = C1;
+			intersectionPoints[1] = C2;
+			intersectionPointsV[0] = new ContinuousVector(C1[0],C1[1],C1[2]);
+			intersectionPointsV[1] = new ContinuousVector(C2[0],C2[1],C2[2]);
+			/**/
 		}
 		
 		if(D1<=0){ //First line segment is a point
@@ -789,6 +865,14 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			d2.times(u);
 			c2.sendSum(aLoc._location, d2);
 			diff.sendDiff(c1,c2);
+			double[] C1= {locationHeight.x*t,locationHeight.y*t,locationHeight.z*t}; //p1+d1*s;
+			double[] C2= {aLoc.locationHeight.x*t,aLoc.locationHeight.y*t,aLoc.locationHeight.z*t}; //p2+d2*t;
+			
+			/* extras */
+			intersectionPoints[0] = C1;
+			intersectionPoints[1] = C2;
+			intersectionPointsV[0] = new ContinuousVector(C1[0],C1[1],C1[2]);
+			intersectionPointsV[1] = new ContinuousVector(C2[0],C2[1],C2[2]);
 			return diff;
 		}
 		/* * Check periodicity in X.*/
@@ -821,6 +905,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			diff.normalizeVector(0.01*_radius);
 		}
 		return diff;
+		
 	}
 	
 	/* 
@@ -910,7 +995,45 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 				_myNeighbors.addLast(aNb);
 		}
 	}
-
+	double rotationAngle = 0;
+	/**
+	 * @uml.property  name="torque"
+	 * @uml.associationEnd  
+	 */
+	EuclideanVector torque = new EuclideanVector(_location,_location);
+	
+	/**
+	 * Apply the rotation angle stored 
+	 */
+	public void rotate()
+	{
+	
+		if (rotationAngle > 0 && torque.magnitude > 0 && 
+				rotationAngle < 0.6)
+		{ 
+			ContinuousVector[] center_head = {_location,locationHeight};
+			ContinuousVector[] center_tail = {_location,_location};
+			ContinuousVector[] T1 = {
+	        		new ContinuousVector(torque.start[0],torque.start[1],torque.start[2]),
+	        		new ContinuousVector(torque.start[0]+torque.mag_x,
+	        				torque.start[1] + torque.mag_y,
+	        				torque.start[2] + torque.mag_z)};
+	     
+		    ContinuousVector newHead = RotateVector(rotationAngle,center_head,T1);
+		    ContinuousVector newTail = RotateVector(rotationAngle,center_tail,T1);
+	   
+		    
+		    if (!Double.isNaN(newHead.x) && !Double.isNaN(newTail.x))
+		    {
+		    	this._location = newHead; 
+		    	this.locationHeight = newTail;
+		    }
+		}
+		
+		rotationAngle = 0;
+		torque = new EuclideanVector(_location,_location);
+	}
+	
 	/**
 	 * \brief With the agent move calculated, apply this movement, taking care
 	 * to respect boundary conditions.
@@ -956,12 +1079,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		Double delta = _movement.norm();
 		_movement.reset();
-		if(_species.speciesClass.equals("Fungus")) {
+		/*if(_species.speciesClass.equals("Fungus")) {
 			//System.out.println("hello");
 			return delta/_totalHeight;
 		}
-		else {
-		return delta/_totalRadius;}
+		else {}*/
+		return delta/_totalRadius;
 	}
 
 	/**
@@ -1106,7 +1229,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		
 		// location info and radius
 		if(_species.speciesClass.equals("Fungus")) {
-		tempString.append(",locationX,locationY,locationZ,radius,totalRadius,height,totalHeight");}
+		tempString.append(",locationX,locationY,locationZ,locationHeightX,locationHeightY,locationHeightZ,radius,totalRadius,height,totalHeight");}
 		else {
 			tempString.append(",locationX,locationY,locationZ,radius,totalRadius");
 		}
@@ -1126,9 +1249,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		// write the data matching the header file
 		StringBuffer tempString = super.writeOutput();
+		ContinuousVector locht=getLocationHeight();
+		//System.out.println(locationHeight);
 		if(_species.speciesClass.equals("Fungus")) {
 		// location info and radius
-		tempString.append(","+_location.x+","+_location.y+","+_location.z+",");
+		tempString.append(","+_location.x+","+_location.y+","+_location.z+","+locht.x+","+locht.y+","+locht.z+",");
 		tempString.append(_radius+","+_totalRadius+","+_height+","+_totalHeight);}
 		else {
 			// location info and radius
@@ -1445,16 +1570,17 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public ContinuousVector getLocationHeight()
 	{
 		if(_species.speciesClass.equals("Fungus")) {
-			Double xlocheight = _location.x+ _directionx *_height;
-			/* The 2.0 * Math.random() is inserted to slant the position of the hyphal agent*/
-			/*Double ylocheight =_location.y+2.0*Math.random();*/ 
-			Double ylocheight =_location.y+ (random.nextBoolean() ? 1 : -1 )* _directiony;
-			/*System.out.println(_directionx);
-			System.out.println(_directiony);
-			System.out.println(xlocheight);
-			System.out.println(ylocheight);*/
-			
+//			Double xlocheight = _location.x+ _directionx *_height;
+//			/* The 2.0 * Math.random() is inserted to slant the position of the hyphal agent*/
+//			/*Double ylocheight =_location.y+2.0*Math.random();*/ 
+//			Double ylocheight =_location.y+ (random.nextBoolean() ? 1 : -1 )* _directiony;
+//			
+			//To consider the angle and thus torque, the x coordinate is
+			//going to be changed by the height with no direction. 
+			Double xlocheight = _location.x+_height;
+			Double ylocheight =_location.y;
 			locationHeight.set(xlocheight, ylocheight, _location.z);
+			//System.out.println(locationHeight);
 			return locationHeight;
 		}
 		else {
@@ -1616,5 +1742,35 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		return _species.domain;
 	}
+	//return end point
+		public static ContinuousVector RotateVector(double theta, 
+				ContinuousVector[] v, ContinuousVector[] orientation)
+	    {
+			//0 = start, 1 = end of vector
+			//normalization of localized euclidean vector
+			double norm = orientation[1].distance(orientation[0]);
+
+			double vo_mag_x = (orientation[1].x - orientation[0].x) / norm;
+	        double vo_mag_y = (orientation[1].y - orientation[0].y) / norm;
+	        double vo_mag_z = (orientation[1].z - orientation[0].z) / norm;
+
+	        double mag_x = v[1].x-v[0].x;
+	        double mag_y = v[1].y-v[0].y;
+	        double mag_z = v[1].z-v[0].z;
+	        Quaternion Q1 = new Quaternion((double)0,mag_x,mag_y,mag_z);
+	        
+	        Quaternion Q2 = new Quaternion((float)Math.cos(theta / 2),
+		            (float)(/*vo.x*/vo_mag_x * Math.sin(theta / 2)),
+		            (float)(/*vo.y*/vo_mag_y * Math.sin(theta / 2)),
+		            (float)(/*vo.z*/vo_mag_z * Math.sin(theta / 2)));
+	       Quaternion conjQ2 = Quaternion.Conjugate(Q2);
+
+	        Quaternion Q3;
+
+	        Q3 = Quaternion.Multiply(Quaternion.Multiply(Q2,Q1),conjQ2);
+
+	        ContinuousVector result = new ContinuousVector(v[0].x + Q3.x, v[0].y + Q3.y, v[0].z + Q3.z);
+	        return result;
+	    }
 
 }

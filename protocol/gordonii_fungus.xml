@@ -93,7 +93,7 @@ A few general points about protocol files:
 			simulation will end. -->
 		<timeStep>
 			<param name="adaptive">true</param>
-			<param name="timeStepIni" unit="hour">0.5</param>
+			<param name="timeStepIni" unit="hour">1</param>
 			<param name="timeStepMin" unit="hour">0.05</param>
 			<param name="timeStepMax" unit="hour">1.0</param>
 			<param name="endOfSimulation" unit="day">2</param>
@@ -204,8 +204,8 @@ A few general points about protocol files:
 			-->
 
 			<solute name="MyGlucose">
-				<param name="Sbulk" unit="g.L-1">0.439</param>
-				<param name="Sin" unit="g.L-1">0.439</param>
+				<param name="Sbulk" unit="g.L-1">1</param>
+				<param name="Sin" unit="g.L-1">1</param>
 			</solute>
 			
 			<solute name="pressure">
@@ -435,7 +435,7 @@ A few general points about protocol files:
 		<param name="kHyd" unit="hr-1">0.007</param>
 
 		<reaction name="MyGrowthGordonii" status="active"/>
-		<reaction name="myInactivationGordonii" status="active"/>
+		<reaction name="myInactivationGordonii" status="inactive"/>
 
 		<initArea number="50">
 			<param name="birthday" unit="hour">0.0</param>
@@ -471,7 +471,7 @@ A few general points about protocol files:
 		<initArea number="5">
 			<param name="birthday" unit="hour">0</param>
 			<coordinates x="0" y="0" z="0"/>
-			<coordinates x="0.0" y="128" z="0"/>
+			<coordinates x="1" y="264" z="0"/>
 		</initArea>
 	</species>
 	
