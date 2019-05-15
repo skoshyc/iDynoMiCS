@@ -153,7 +153,7 @@ public class ParticleWithCapsule implements Serializable
 		// bvm 27.1.2009 for using color definitions
 
 		setNameCore(p.getName());
-		System.out.print(p.speciesIndex);
+		//System.out.print(p.speciesIndex);
 		_isFungus=p.getStringClass().equals("Fungus");
 		if (_isFungus) {
 			setCoreRadius(p._radius);			

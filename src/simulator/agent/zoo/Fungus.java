@@ -208,7 +208,7 @@ public class Fungus extends LocatedAgent implements Cloneable
 			// Get a clone of the progenitor
 			Fungus baby = sendNewAgent();
 			baby.giveName();
-
+			randomizeOrientation();
 			updateMass();
 			/* If no mass defined, use the division radius to find the mass */
 			// Note this should have been done already in initFromProtocolFile

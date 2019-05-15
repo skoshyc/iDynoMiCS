@@ -184,6 +184,20 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		_speciesParam = new LocatedParam();
 	}
 	
+	public void randomizeOrientation()
+	{
+		if (_agentGrid.is3D)
+			locationHeight = new ContinuousVector(0.0, ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble()); //random orientation; 
+		else 
+			locationHeight = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0); //random orientation;
+
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * \brief Creates a daughter Located Agent by cloning this agent and
 	 * parameter objects.
@@ -196,6 +210,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		LocatedAgent o = (LocatedAgent) super.clone();
 		o._location = (ContinuousVector) this._location.clone();
+		o.locationHeight=(ContinuousVector) this.locationHeight.clone();
 		o._movement = (ContinuousVector) this._movement.clone();
 		o._divisionDirection = (ContinuousVector)
 											this._divisionDirection.clone();
@@ -234,6 +249,33 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			LogFile.writeError(e, "LocatedAgent.createNewAgent()");
 		}
 	}
+	
+	protected void updateOrientationVector(double angle)
+	{
+		//_headLocation = new ContinuousVector(this._location.x, this._location.y + this._radius - this._capsular_radius, this._location.z); 
+		//_tailLocation = new ContinuousVector(this._location.x, this._location.y - this._radius + this._capsular_radius, this._location.z);
+	
+		ContinuousVector[] vo = new ContinuousVector[2];
+		vo[0] = this._location;
+		vo[1] = new ContinuousVector(this._location.x+1,this._location.y,this._location.z+1);
+		
+		ContinuousVector[] v = new ContinuousVector[2]; 
+		v[0] = this._location;
+		
+		angle = Math.toRadians(90) ;//Math.random(); //in radians
+		
+		//rotate head from center
+		v[1] = this.locationHeight;
+		this.locationHeight = RotateVector(angle,v,vo);
+		//System.out.println(locationHeight);
+		//rotate tail from center
+		//v[1] = this._tailLocation;
+		//this._tailLocation = RotateVector(angle,v,vo);
+	}
+	
+	
+	
+	
 	
 	/**
 	 * \brief Creates an agent of the specified species and notes the grid in
@@ -623,7 +665,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 					//System.out.println(this.rotationAngle+"");
 					double gain=0.1; //from iDynoBacillus.simulator.agent.LocatedAgent.addSpringAttachment			
 					if (isMutual) {
-						forceMe.Times(0.5f);
+						//forceMe.Times(0.5f);
 						this.rotationAngle *= 0.5;
 						forceMe = forceMe.Times(gain);
 						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
@@ -634,6 +676,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 						aNeighbor.rotationAngle *= 0.5;
 						aNeighbor._movement.subtract(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);;
 					} else {
+						this.rotationAngle *= 0.5;
 						forceMe = forceMe.Times(gain);
 						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
 					}
@@ -995,7 +1038,9 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 				_myNeighbors.addLast(aNb);
 		}
 	}
-	double rotationAngle = 0;
+	//double rotationAngle = 0;
+	double rotationAngle = Math.toRadians(Math.random() * 360);
+    
 	/**
 	 * @uml.property  name="torque"
 	 * @uml.associationEnd  
@@ -1007,12 +1052,15 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public void rotate()
 	{
-	
+		//System.out.println(rotationAngle);
 		if (rotationAngle > 0 && torque.magnitude > 0 && 
 				rotationAngle < 0.6)
 		{ 
-			ContinuousVector[] center_head = {_location,locationHeight};
-			ContinuousVector[] center_tail = {_location,_location};
+			ContinuousVector center1 = new ContinuousVector(); 
+			center1.sendSum(_location, locationHeight);
+			center1.times(0.5);
+			ContinuousVector[] center_head = {center1,locationHeight};
+			ContinuousVector[] center_tail = {center1,_location};
 			ContinuousVector[] T1 = {
 	        		new ContinuousVector(torque.start[0],torque.start[1],torque.start[2]),
 	        		new ContinuousVector(torque.start[0]+torque.mag_x,
@@ -1025,13 +1073,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		    
 		    if (!Double.isNaN(newHead.x) && !Double.isNaN(newTail.x))
 		    {
-		    	this._location = newHead; 
-		    	this.locationHeight = newTail;
+		    	this.locationHeight = newHead; 
+		    	this._location = newTail;
 		    }
 		}
 		
-		rotationAngle = 0;
-		torque = new EuclideanVector(_location,_location);
+		//rotationAngle = 0;
+		//torque = new EuclideanVector(_location,_location);
 	}
 	
 	/**
@@ -1065,7 +1113,8 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		if (_movement.isZero())
 			return 0.0;
-
+		//Check to see if the boundaries are crossed
+		checkBoundariesTailHead();
 		/*
 		 * Now apply the movement.
 		 */
@@ -1087,6 +1136,82 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		return delta/_totalRadius;
 	}
 
+	
+	public void checkBoundariesTailHead() {
+		
+		ContinuousVector _newTailLoc = new ContinuousVector();
+		_newTailLoc.set(_location);
+		_newTailLoc.add(_movement);
+		
+		ContinuousVector _newHeadLoc = new ContinuousVector();
+		_newHeadLoc.set(locationHeight);
+		_newHeadLoc.add(_movement);
+		
+		AllBC aBoundaryT = getDomain().testCrossedBoundary(_newTailLoc);
+		AllBC aBoundaryH = getDomain().testCrossedBoundary(_newHeadLoc);
+		
+		boolean testHead = (aBoundaryH!=null);
+		boolean testTail = (aBoundaryT!=null);
+		
+		
+		if (testHead)
+		{
+			 EuclideanVector force = 
+				 new EuclideanVector(locationHeight,aBoundaryH.getOrthoProj(_location));
+
+			 //we need a vector pointing inside with the size of the capsular radius
+			 ContinuousVector forceNormal = new ContinuousVector(0.0,0.0,0.0); 
+			 //In the iDynoBacillus code the getNormalInside() fn has a cont. vector as input
+			 forceNormal = aBoundaryH.getShape().getNormalInside();
+			 forceNormal.normalizeVector();
+			 forceNormal.times(_radius);
+			 force.mag_x += forceNormal.x;
+			 force.mag_y += forceNormal.y;
+			 force.mag_z += forceNormal.z;
+			 
+			 _movement.add(force.getContinuousVector());
+			 
+			
+			 double[] _center = {_location.x,_location.y,_location.z};
+				EuclideanVector N = new  EuclideanVector(force.end,_center);
+				EuclideanVector T = force.CrossProduct(N);;
+				this.rotationAngle += CollisionEngine.applyForceToCapsule(
+						this._location, new EuclideanVector(_location,locationHeight),
+						_radius, force, -1, null);
+				torque = torque.Plus(T);
+		}
+		
+		if (testTail)
+		{
+			 EuclideanVector force = 
+				 new EuclideanVector(_location,aBoundaryT.getOrthoProj(_location));
+		
+		
+			 //we need a vector pointing inside with the size of the capsular radius
+			 ContinuousVector forceNormal = new ContinuousVector(0.0,0.0,0.0); 
+			 forceNormal = aBoundaryT.getShape().getNormalInside();
+			 forceNormal.normalizeVector();
+			 forceNormal.times(_radius);
+			 force.mag_x += forceNormal.x;
+			 force.mag_y += forceNormal.y;
+			 force.mag_z += forceNormal.z;
+			 //force.Plus(_capsular_radius,_capsular_radius,_capsular_radius);
+			 
+			 _movement.add(force.getContinuousVector());
+			 //_location.add(force.getContinuousVector());
+			 
+			 double[] _center = {_location.x,_location.y,_location.z};
+				EuclideanVector N = new  EuclideanVector(force.end,_center);
+				EuclideanVector T = force.CrossProduct(N);;
+				this.rotationAngle += CollisionEngine.applyForceToCapsule(
+						this._location, new EuclideanVector(_location,locationHeight),
+						_radius, force, -1, null);
+				torque = torque.Plus(T);
+		}
+
+	}
+	
+	
 	/**
 	 * \brief Used by the move method to determine if an agent's move crosses
 	 * any of the domain's boundaries.
