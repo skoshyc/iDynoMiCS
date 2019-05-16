@@ -1702,9 +1702,22 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 //			
 			//To consider the angle and thus torque, the x coordinate is
 			//going to be changed by the height with no direction. 
-			Double xlocheight = _location.x+_height;
+			double magnitude = locationHeight.distance(_location);
+			if (magnitude == 0)
+			{
+				randomizeOrientation();
+				 magnitude = locationHeight.distance(_location);
+			}
+			double magX = ((locationHeight.x - _location.x) / magnitude) * (_height) ;
+			double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
+			double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
+			/*Double xlocheight = _location.x+_height;
 			Double ylocheight =_location.y;
-			locationHeight.set(xlocheight, ylocheight, _location.z);
+			locationHeight.set(xlocheight, ylocheight, _location.z);*/
+			Double xlocheight = _location.x+magX;
+			Double ylocheight =_location.y;
+			Double zlocheight = _location.z+magZ;
+			locationHeight.set(xlocheight, ylocheight, zlocheight);
 			//System.out.println(locationHeight);
 			return locationHeight;
 		}
