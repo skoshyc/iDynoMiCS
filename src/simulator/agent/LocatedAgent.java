@@ -126,6 +126,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	protected ContinuousVector locationHeight = new ContinuousVector();
 	
+	/***
+	 * Agent mid point position with height-continuous coordinates
+	 */
+	
+	protected ContinuousVector center1 = new ContinuousVector(); 
 	/**
 	 * ContinuousVector noting the move that will be applied to the agents position.
 	 */
@@ -187,10 +192,18 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public void randomizeOrientation()
 	{
 		if (_agentGrid.is3D)
-			locationHeight = new ContinuousVector(0.0, ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble()); //random orientation; 
-		else 
+			{locationHeight = new ContinuousVector(0.0, ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble()); //random orientation;
+			center1.sendSum(_location, locationHeight);
+			center1.times(0.5);}
+		else {
 			locationHeight = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0); //random orientation;
-
+			_location = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0);
+			center1.sendSum(_location, locationHeight);
+			center1.times(0.5);
+		}
+		/*System.out.println(_location);
+		System.out.println(locationHeight);
+		System.out.println(center1);*/
 	}
 	
 	
@@ -254,13 +267,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		//_headLocation = new ContinuousVector(this._location.x, this._location.y + this._radius - this._capsular_radius, this._location.z); 
 		//_tailLocation = new ContinuousVector(this._location.x, this._location.y - this._radius + this._capsular_radius, this._location.z);
-	
+		
 		ContinuousVector[] vo = new ContinuousVector[2];
-		vo[0] = this._location;
-		vo[1] = new ContinuousVector(this._location.x+1,this._location.y,this._location.z+1);
+		vo[0] = this.center1;
+		vo[1] = new ContinuousVector(this.center1.x+1,this.center1.y,this.center1.z+1);
 		
 		ContinuousVector[] v = new ContinuousVector[2]; 
-		v[0] = this._location;
+		v[0] = this.center1;
 		
 		angle = Math.toRadians(90) ;//Math.random(); //in radians
 		
@@ -269,8 +282,9 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		this.locationHeight = RotateVector(angle,v,vo);
 		//System.out.println(locationHeight);
 		//rotate tail from center
-		//v[1] = this._tailLocation;
-		//this._tailLocation = RotateVector(angle,v,vo);
+		v[1] = this._location;
+		this._location = RotateVector(angle,v,vo);
+		
 	}
 	
 	
@@ -1056,9 +1070,6 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		if (rotationAngle > 0 && torque.magnitude > 0 && 
 				rotationAngle < 0.6)
 		{ 
-			ContinuousVector center1 = new ContinuousVector(); 
-			center1.sendSum(_location, locationHeight);
-			center1.times(0.5);
 			ContinuousVector[] center_head = {center1,locationHeight};
 			ContinuousVector[] center_tail = {center1,_location};
 			ContinuousVector[] T1 = {
@@ -1680,6 +1691,18 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public ContinuousVector getLocation()
 	{
+		/*double magnitude = locationHeight.distance(center1);
+		if (magnitude == 0)
+		{
+			randomizeOrientation();
+			 magnitude = locationHeight.distance(center1);
+		}
+		double magX = ((locationHeight.x - center1.x) / magnitude) * (_height) ;
+		double magY = ((locationHeight.y - center1.y) / magnitude) * (_height) ;
+		double magZ = ((locationHeight.z - center1.z) / magnitude) * (_height) ;
+		_location.x=center1.x-magX;
+		//_location.y=center1.y-magY;
+		_location.z=center1.z-magZ;*/
 		return _location;
 	}
 	
@@ -1701,16 +1724,16 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 //			Double ylocheight =_location.y+ (random.nextBoolean() ? 1 : -1 )* _directiony;
 //			
 			//To consider the angle and thus torque, the x coordinate is
-			//going to be changed by the height with no direction. 
-			double magnitude = locationHeight.distance(_location);
+			//going to be changed as in the idynobacillus code. 
+			double magnitude = locationHeight.distance(center1);
 			if (magnitude == 0)
 			{
 				randomizeOrientation();
-				 magnitude = locationHeight.distance(_location);
+				 magnitude = locationHeight.distance(center1);
 			}
-			double magX = ((locationHeight.x - _location.x) / magnitude) * (_height) ;
-			double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
-			double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
+			double magX = ((locationHeight.x - center1.x) / magnitude) * (_height) ;
+			double magY = ((locationHeight.y - center1.y) / magnitude) * (_height) ;
+			double magZ = ((locationHeight.z - center1.z) / magnitude) * (_height) ;
 			/*Double xlocheight = _location.x+_height;
 			Double ylocheight =_location.y;
 			locationHeight.set(xlocheight, ylocheight, _location.z);*/
@@ -1719,6 +1742,9 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			Double zlocheight = _location.z+magZ;
 			locationHeight.set(xlocheight, ylocheight, zlocheight);
 			//System.out.println(locationHeight);
+			/*center1.x=_location.x-magX;
+			//_location.y=center1.y-magY;
+			center1.z=_location.z-magZ;*/
 			return locationHeight;
 		}
 		else {
