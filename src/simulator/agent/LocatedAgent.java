@@ -77,9 +77,9 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 * Direction of the hypha
 	 */
 	
-	public Double _directionx = Math.random();
+	//public Double _directionx = Math.random();
 	
-	public Double _directiony = Math.random();
+	//public Double _directiony = Math.random();
 	
 	public static double distance = 0; //stores the latest calculated distance
 	public static double[] intersectionPoints[] = {{0,0,0},{0,0,0}};
@@ -94,7 +94,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	/**
 	 * Random number generator to add or subtract the directions. Used in getLocationHeight()
 	 */
-	public static Random random= new Random();
+	//public static Random random= new Random();
 	
 	/**
 	 * Radius at which this agent will divide.
@@ -192,12 +192,17 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	public void randomizeOrientation()
 	{
 		if (_agentGrid.is3D)
-			{locationHeight = new ContinuousVector(0.0, ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble()); //random orientation;
+			{
+			//_location = new ContinuousVector(0.0,ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble());//random orientation;
+			//locationHeight = new ContinuousVector(0.0, ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble()); 
+			locationHeight = new ContinuousVector(_location.x+_height ,_location.y+_height , _location.z+_height); //random orientation;
 			center1.sendSum(_location, locationHeight);
 			center1.times(0.5);}
 		else {
-			locationHeight = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0); //random orientation;
-			_location = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0);
+			//_location = new ContinuousVector(ExtraMath.random.nextDouble() , 0.0, 0.0);//random orientation;
+			//_location = new ContinuousVector(0.5 , 5.0, 0.0);//random orientation;
+			//locationHeight = new ContinuousVector(ExtraMath.random.nextDouble() , ExtraMath.random.nextDouble(), 0.0); //random orientation;
+			locationHeight = new ContinuousVector(_location.x+_height,_location.y+_height , _location.z); 
 			center1.sendSum(_location, locationHeight);
 			center1.times(0.5);
 		}
@@ -858,9 +863,7 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		d1.sendDiff(locationHeight,_location);
 		d2.sendDiff(aLoc.locationHeight,aLoc._location);
 		d12.sendDiff(aLoc._location,_location);
-		/*System.out.println(d1);
-		System.out.println(d2);
-		System.out.println(d12);*/
+		
 		Double R = d1.prodScalar(d2);
 		Double D1 = d1.prodScalar(d1);
 		Double D2 = d2.prodScalar(d2);
@@ -1385,11 +1388,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	{
 		// write the data matching the header file
 		StringBuffer tempString = super.writeOutput();
-		ContinuousVector locht=getLocationHeight();
+		//ContinuousVector locht=getLocationHeight();
 		//System.out.println(locationHeight);
 		if(_species.speciesClass.equals("Fungus")) {
 		// location info and radius
-		tempString.append(","+_location.x+","+_location.y+","+_location.z+","+locht.x+","+locht.y+","+locht.z+",");
+		tempString.append(","+_location.x+","+_location.y+","+_location.z+","+locationHeight.x+","+locationHeight.y+","+locationHeight.z+",");
 		tempString.append(_radius+","+_totalRadius+","+_height+","+_totalHeight);}
 		else {
 			// location info and radius
@@ -1434,6 +1437,24 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 						_radius);
 				_totalHeight = ExtraMath.lengthOfACylinder(_totalVolume,
 						_totalRadius);
+				double magnitude = locationHeight.distance(_location);
+				if (magnitude == 0)
+				{
+					randomizeOrientation();
+					 magnitude = locationHeight.distance(_location);
+				}
+				double magX = ((locationHeight.x - _location.x) / magnitude) * (_height) ;
+				//double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
+				//double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
+				
+				Double xlocheight = _location.x+magX;
+				Double ylocheight =_location.y;
+				//Double xlocheight = _location.x;
+				//Double ylocheight =_location.y+magY;
+				Double zlocheight = _location.z;
+				locationHeight.set(xlocheight, ylocheight, zlocheight);
+				
+				
 			}else {
 				_radius = ExtraMath.radiusOfACylinder(_volume,
 				_species.domain.length_Z);
@@ -1723,26 +1744,32 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 //			/*Double ylocheight =_location.y+2.0*Math.random();*/ 
 //			Double ylocheight =_location.y+ (random.nextBoolean() ? 1 : -1 )* _directiony;
 //			
-			//To consider the angle and thus torque, the x coordinate is
-			//going to be changed as in the idynobacillus code. 
-			double magnitude = locationHeight.distance(center1);
-			if (magnitude == 0)
-			{
-				randomizeOrientation();
-				 magnitude = locationHeight.distance(center1);
-			}
-			double magX = ((locationHeight.x - center1.x) / magnitude) * (_height) ;
-			double magY = ((locationHeight.y - center1.y) / magnitude) * (_height) ;
-			double magZ = ((locationHeight.z - center1.z) / magnitude) * (_height) ;
 			/*Double xlocheight = _location.x+_height;
 			Double ylocheight =_location.y;
 			locationHeight.set(xlocheight, ylocheight, _location.z);*/
+			
+			
+			
+			//To consider the angle and thus torque, the x coordinate is
+			//going to be changed as in the idynobacillus code. 
+			/*double magnitude = locationHeight.distance(_location);
+			if (magnitude == 0)
+			{
+				randomizeOrientation();
+				 magnitude = locationHeight.distance(_location);
+			}
+			double magX = ((locationHeight.x - _location.x) / magnitude) * (_height) ;
+			//double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
+			//double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
+			
 			Double xlocheight = _location.x+magX;
 			Double ylocheight =_location.y;
-			Double zlocheight = _location.z+magZ;
+			//Double xlocheight = _location.x;
+			//Double ylocheight =_location.y+magY;
+			Double zlocheight = _location.z;
 			locationHeight.set(xlocheight, ylocheight, zlocheight);
 			//System.out.println(locationHeight);
-			/*center1.x=_location.x-magX;
+			center1.x=_location.x-magX;
 			//_location.y=center1.y-magY;
 			center1.z=_location.z-magZ;*/
 			return locationHeight;
