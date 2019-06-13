@@ -229,7 +229,7 @@ public class Fungus extends LocatedAgent implements Cloneable
 			//position.x += this._totalRadius;
 			
 			baby.setLocation(position);
-			position.add(2.5,2.5,0.0);
+			position.add(ExtraMath.random.nextDouble(),ExtraMath.random.nextDouble(),0.0);
 			baby.setLocationHeight(position);
 			baby.registerBirth();
 		}

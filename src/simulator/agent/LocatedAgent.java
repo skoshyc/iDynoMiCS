@@ -658,11 +658,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	   		if (angle < 0)
 	   			bactHim.sendDiff(aNeighbor._location,aNeighbor.locationHeight);	
 			diff = computeDifferenceAxis(aNeighbor);
+			//System.out.println(diff);
 			/*
 			 * Compute effective cell-cell distance.
 			 */
-			 delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
-
+			 //delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
+			 delta =diff.checkSign(diff);	
+			 //System.out.println(delta);
 			 if ( delta < 0.0 )
 				{
 				//calculate translation and rotation
@@ -1444,14 +1446,14 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 					 magnitude = locationHeight.distance(_location);
 				}
 				double magX = ((locationHeight.x - _location.x) / magnitude) * (_height) ;
-				//double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
-				//double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
+				double magY = ((locationHeight.y - _location.y) / magnitude) * (_height) ;
+				double magZ = ((locationHeight.z - _location.z) / magnitude) * (_height) ;
 				
 				Double xlocheight = _location.x+magX;
-				Double ylocheight =_location.y;
+				//Double ylocheight =_location.y;
 				//Double xlocheight = _location.x;
-				//Double ylocheight =_location.y+magY;
-				Double zlocheight = _location.z;
+				Double ylocheight =_location.y+magY;
+				Double zlocheight = _location.z+magZ;
 				locationHeight.set(xlocheight, ylocheight, zlocheight);
 				
 				

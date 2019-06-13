@@ -448,4 +448,17 @@ public class ContinuousVector implements Cloneable
 		out.z = this.x*other.y - this.y*other.x;
 		return out;
 	}
-}
+	
+	
+	/**
+	 * Checks if any of the coordinates of a vector is negative
+	 */
+	
+	public double checkSign(ContinuousVector vec)
+	{
+		if ( Math.signum(vec.x)<0||Math.signum(vec.y)<0||Math.signum(vec.z)<0 ) {
+		    return -1.0;      }
+		else {return 1.0;}
+		};
+	}
+	
