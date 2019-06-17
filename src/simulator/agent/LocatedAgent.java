@@ -662,8 +662,9 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			/*
 			 * Compute effective cell-cell distance.
 			 */
-			 //delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
-			 delta =diff.checkSign(diff);	
+			 delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
+			 //delta =diff.checkSign(diff);	
+			//delta = diff.norm() - 0.01;
 			 //System.out.println(delta);
 			 if ( delta < 0.0 )
 				{

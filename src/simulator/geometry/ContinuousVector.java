@@ -457,7 +457,8 @@ public class ContinuousVector implements Cloneable
 	public double checkSign(ContinuousVector vec)
 	{
 		if ( Math.signum(vec.x)<0||Math.signum(vec.y)<0||Math.signum(vec.z)<0 ) {
-		    return -1.0;      }
+		    return -1.0;      
+		    }
 		else {return 1.0;}
 		};
 	}
