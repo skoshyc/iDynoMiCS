@@ -225,7 +225,9 @@ public abstract class SpecialisedAgent extends Agent implements HasSpecies, Clon
 	}
 	
 	
-	
+	/*public void rotate() {
+
+	}*/
 	
 	
 	

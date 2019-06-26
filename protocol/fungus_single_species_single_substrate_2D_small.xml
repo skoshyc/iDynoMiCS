@@ -421,7 +421,7 @@
 		<param name="shovingMaxNodes">2e6</param>
 		<param name="shovingFraction">0.025</param>
 		<param name="shovingMaxIter">250</param>
-		<param name="shovingMutual">false</param>
+		<param name="shovingMutual">true</param>
 	</agentGrid>
 
 
@@ -523,7 +523,7 @@
 			<param name="mass" unit="fg">0</param>
 		</particle>
 
-		<param name="color">blue</param>
+		<param name="color">green</param>
 		<param name="computationDomain">MyBiofilm</param>
 		<param name="divRadius" unit="um">2</param>
 		<param name="divRadiusCV">0.1</param>

@@ -227,7 +227,6 @@ public class Fungus extends LocatedAgent implements Cloneable
 			// Just to avoid to be in the carrier
 			// This is solved by Bas's boundary fix
 			//position.x += this._totalRadius;
-			
 			baby.setLocation(position);
 			position.add(ExtraMath.random.nextDouble(),ExtraMath.random.nextDouble(),0.0);
 			baby.setLocationHeight(position);

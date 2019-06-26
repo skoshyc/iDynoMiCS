@@ -528,6 +528,11 @@ public class AgentContainer
 		} while ((shovIter++ < maxShoveIter) && (nMoved >= shovLimit));
 		LogFile.writeLog(nMoved + "/" + agentList.size() + " after " + shovIter
 				+ " shove iterations");
+		/*//apply total rotations
+		
+		for (SpecialisedAgent anAgent : agentList) {
+					anAgent.rotate();}*/
+		
 	}
 
 	/**
@@ -560,7 +565,8 @@ public class AgentContainer
 		for ( SpecialisedAgent agent : agentList )
 		{
 			deltaMove = agent.interact(MUTUAL);
-			nMoved += (deltaMove >= 0.1  ? 1 : 0);
+			nMoved += (deltaMove >= 0.1  ? 1 : 0); //Original check is 0.1
+			//nMoved += (deltaMove >= 0.005  ? 1 : 0);
 		}
 		return nMoved;
 	}
@@ -647,6 +653,7 @@ public class AgentContainer
 					_grid[0].add(aLoc);
 				else
 					_grid[getIndexedPosition(aLoc.getLocation())].add(aLoc);
+					//_grid[getIndexedPosition(aLoc.getCenter1())].add(aLoc);
 			}
 			catch (Exception e)
 			{
@@ -816,11 +823,11 @@ public class AgentContainer
 			//anAgent.death = "overBoard";
 			anAgent.die(false);
 		}
-		/*if(anAgent.getStringClass().equals("Fungus")) {
+		if(anAgent.getStringClass().equals("Fungus")) {
 			int newIndex1 = getIndexedPosition(anAgent.getLocationHeight());
 			int oldIndex1 = anAgent.getGridIndex();
 			
-			 * If gridIndex has changed, update the references.
+			// * If gridIndex has changed, update the references.
 			 
 			LogFile.writeLogDebug("Debugging AgentContainer.registerMove()");
 			if ( isValid(anAgent.getLocationHeight()) )
@@ -834,7 +841,7 @@ public class AgentContainer
 					anAgent.setGridIndex(newIndex1);
 				}
 			}
-		}*/
+		}
 	}
 	
 	

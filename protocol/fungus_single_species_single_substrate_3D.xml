@@ -176,7 +176,7 @@
 				global domain size in a direction is the number of elements times the resolution:
 					nI*resolution
 			-->
-			<grid nDim="2" nI="33" nJ="33" nK="1"/>
+			<grid nDim="3" nI="17" nJ="17" nK="17"/>
 			<param name="resolution" unit="um">8</param>
 
 			<!-- 'boundaryLayer' sets the distance above the biofilm/liquid interface that the
@@ -184,7 +184,7 @@
 				solute concentration will vary because of diffusion. The length of the boundaryLayer 
 				must be a multiple of the grid resolution
 				-->
-			<param name="boundaryLayer" unit="um">48</param>
+			<param name="boundaryLayer" unit="um">40</param>
 
 			<!-- The 'biofilmDiffusivity' sets the relative diffusivity of the biofilm compared
 				to water; because the biofilm is slightly more dense than water, the diffusivity
@@ -243,7 +243,7 @@
 				<param name="activeForSolute">yes</param>
 				<param name="bulk">MyTank</param>
 				<shape class="Planar">
-					<param name="pointIn" i="33" j="0" k="0"/>
+					<param name="pointIn" i="17" j="0" k="0"/>
 					<param name="vectorOut" i="1" j="0" k="0"/>
 				</shape>
 			</boundaryCondition>
@@ -254,18 +254,18 @@
 					<param name="vectorOut" i="0" j="-1" k="0"/>
 				</shape>
 				<shape class="Planar">
-					<param name="pointIn" i="0" j="33" k="0"/>
+					<param name="pointIn" i="0" j="17" k="0"/>
 					<param name="vectorOut" i="0" j="1" k="0"/>
 				</shape>
 			</boundaryCondition>
-			
+
 			<boundaryCondition class="BoundaryCyclic" name="x0y">
 				<shape class="Planar">
 					<param name="pointIn" i="0" j="0" k="-1"/>
 					<param name="vectorOut" i="0" j="0" k="-1"/>
 				</shape>
 				<shape class="Planar">
-					<param name="pointIn" i="0" j="0" k="1"/>
+					<param name="pointIn" i="0" j="0" k="17"/>
 					<param name="vectorOut" i="0" j="0" k="1"/>
 				</shape>
 			</boundaryCondition>
@@ -421,7 +421,7 @@
 		<param name="shovingMaxNodes">2e6</param>
 		<param name="shovingFraction">0.025</param>
 		<param name="shovingMaxIter">250</param>
-		<param name="shovingMutual">true</param>
+		<param name="shovingMutual">false</param>
 	</agentGrid>
 
 
@@ -523,7 +523,7 @@
 			<param name="mass" unit="fg">0</param>
 		</particle>
 
-		<param name="color">green</param>
+		<param name="color">blue</param>
 		<param name="computationDomain">MyBiofilm</param>
 		<param name="divRadius" unit="um">2</param>
 		<param name="divRadiusCV">0.1</param>
@@ -532,7 +532,7 @@
 		<param name="babyMassFrac">0.5</param>
 		<param name="babyMassFracCV">0.05</param>
 		<param name="shoveFactor" unit="um">2</param>
-		<param name="shoveLimit" unit="um">0.0</param>
+		<param name="shoveLimit" unit="um">0</param>
 
 		<param name="epsMax">1</param>
 		<param name="kHyd" unit="hr-1">0.007</param>

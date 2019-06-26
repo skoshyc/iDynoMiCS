@@ -66,12 +66,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	/**
 	 * Height of this agent.
 	 */
-	public Double _height = 2*_radius;
+	public Double _height = 10.0;
 	
 	/**
 	 * Cell Height including any capsules.
 	 */
-	public Double _totalHeight = 2*_totalRadius;
+	public Double _totalHeight = 10.0;
 	
 	/**
 	 * Direction of the hypha
@@ -662,11 +662,24 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			/*
 			 * Compute effective cell-cell distance.
 			 */
-			 delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
+			 //delta = diff.norm() - (_totalRadius+aNeighbor._totalRadius);
 			 //delta =diff.checkSign(diff);	
-			//delta = diff.norm() - 0.01;
-			 //System.out.println(delta);
-			 if ( delta < 0.0 )
+			delta = diff.norm() - getInteractDistance(aNeighbor);
+			if ( delta < 0.0 )
+			{
+				diff.normalizeVector(delta);
+				if ( isMutual )
+				{
+					diff.times(0.5);
+					aNeighbor._movement.add(diff);
+					//aNeighbor._location.add(5.0*aNeighbor._movement.x,5.0*aNeighbor._movement.y,5.0*aNeighbor._movement.z);
+					//aNeighbor.locationHeight.add(5.0*aNeighbor._movement.x,5.0*aNeighbor._movement.y,5.0*aNeighbor._movement.z);
+				}
+				this._movement.subtract(diff);
+				//this._location.add(5.0*this._movement.x,5.0*this._movement.y,5.0*this._movement.z);
+				//this.locationHeight.add(5.0*this._movement.x,5.0*this._movement.y,5.0*this._movement.z);
+			}
+			 /*if ( delta < 0.0 )
 				{
 				//calculate translation and rotation
 					EuclideanVector forceMe = new EuclideanVector(intersectionPointsV[0],intersectionPointsV[1]);
@@ -677,13 +690,14 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 					
 					//forceMe.Times(0.5f);
 						
-					double[] _center = {_location.x,_location.y,_location.z};
+					//double[] _center = {_location.x,_location.y,_location.z};
+					double[] _center = {center1.x,center1.y,center1.z};
 					EuclideanVector N = new  EuclideanVector(forceMe.end,_center);
 					EuclideanVector T = forceMe.CrossProduct(N);;
-					this.rotationAngle += /*=*/ CollisionEngine.applyForceToCapsule(
-					this._location, new EuclideanVector(_location,locationHeight),
+					this.rotationAngle += = CollisionEngine.applyForceToCapsule(
+					this.center1, new EuclideanVector(_location,locationHeight),
 					_radius, forceMe, -1, null);
-					torque = /*T;*/torque.Plus(T);
+					torque = T;torque.Plus(T);
 					//System.out.println(this.rotationAngle+"");
 					double gain=0.1; //from iDynoBacillus.simulator.agent.LocatedAgent.addSpringAttachment			
 					if (isMutual) {
@@ -691,18 +705,23 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 						this.rotationAngle *= 0.5;
 						forceMe = forceMe.Times(gain);
 						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
-
+						//System.out.println(this._movement);
+						
 						aNeighbor.rotationAngle -= rotationAngle; //= rotationAngle;
-						aNeighbor.torque = /*T;*/aNeighbor.torque.Minus(T);
+						aNeighbor.torque = T;aNeighbor.torque.Minus(T);
 
 						aNeighbor.rotationAngle *= 0.5;
-						aNeighbor._movement.subtract(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);;
+						aNeighbor._movement.subtract(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
+						//System.out.println(aNeighbor._movement);
+						
 					} else {
 						this.rotationAngle *= 0.5;
 						forceMe = forceMe.Times(gain);
 						this._movement.add(forceMe.mag_x,forceMe.mag_y,forceMe.mag_z);
+						//this._location.add(_movement.x,_movement.y,_movement.z);
+						//this.locationHeight.add(_movement.x,_movement.y,_movement.z);
 					}
-				}
+				}*/
 		}
 		else {
 		
@@ -1130,11 +1149,18 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		if (_movement.isZero())
 			return 0.0;
+		
 		//Check to see if the boundaries are crossed
 		checkBoundariesTailHead();
-		/*
-		 * Now apply the movement.
-		 */
+		_location.add(5.0*_movement.x,5.0*_movement.y,5.0*_movement.z);
+		locationHeight.add(5.0*_movement.x,5.0*_movement.y,5.0*_movement.z);
+		
+		/*_location.add(_movement.x,_movement.y,_movement.z);
+		locationHeight.add(_movement.x,_movement.y,_movement.z);*/
+		
+		/* Now apply the movement.*/
+		 
+		
 		setLocation(getVerifiedLocationFromMovement(_movement));
 		if(_species.speciesClass.equals("Fungus")) {
 			setLocationHeight(getVerifiedLocationHeightFromMovement(_movement));
@@ -1145,12 +1171,12 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		 */
 		Double delta = _movement.norm();
 		_movement.reset();
-		/*if(_species.speciesClass.equals("Fungus")) {
-			//System.out.println("hello");
-			return delta/_totalHeight;
+		if(_species.speciesClass.equals("Fungus")) {
+			//System.out.println(delta/_height);
+			return delta/_height;
 		}
-		else {}*/
-		return delta/_totalRadius;
+		else {return delta/_totalRadius;}
+		//return delta/_totalRadius;
 	}
 
 	
@@ -1189,11 +1215,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			 _movement.add(force.getContinuousVector());
 			 
 			
-			 double[] _center = {_location.x,_location.y,_location.z};
+			 double[] _center = {center1.x,center1.y,center1.z};
 				EuclideanVector N = new  EuclideanVector(force.end,_center);
 				EuclideanVector T = force.CrossProduct(N);;
 				this.rotationAngle += CollisionEngine.applyForceToCapsule(
-						this._location, new EuclideanVector(_location,locationHeight),
+						this.center1, new EuclideanVector(_location,locationHeight),
 						_radius, force, -1, null);
 				torque = torque.Plus(T);
 		}
@@ -1217,11 +1243,11 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 			 _movement.add(force.getContinuousVector());
 			 //_location.add(force.getContinuousVector());
 			 
-			 double[] _center = {_location.x,_location.y,_location.z};
+			 double[] _center = {center1.x,center1.y,center1.z};
 				EuclideanVector N = new  EuclideanVector(force.end,_center);
 				EuclideanVector T = force.CrossProduct(N);;
 				this.rotationAngle += CollisionEngine.applyForceToCapsule(
-						this._location, new EuclideanVector(_location,locationHeight),
+						this.center1, new EuclideanVector(_location,locationHeight),
 						_radius, force, -1, null);
 				torque = torque.Plus(T);
 		}
@@ -1585,11 +1611,13 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 	 */
 	public Double getShoveRadius()
 	{
-		/*if(_species.speciesClass.equals("Fungus")) {
-			return _totalHeight * getShoveFactor(); 
+		if(_species.speciesClass.equals("Fungus")) {
+			return _height * getShoveFactor(); 
 		}
-		else {}*/
-		return _totalRadius * getShoveFactor();
+		else {
+			return _totalRadius * getShoveFactor();
+			}
+		
 	}
 	
 	/**
@@ -1783,7 +1811,16 @@ public abstract class LocatedAgent extends ActiveAgent implements Cloneable
 		}
 	}
 	
-	
+	public ContinuousVector getCenter1()
+	{
+		if(_species.speciesClass.equals("Fungus")) {
+			return center1;
+		}
+		else {
+			center1.set(_location); //For spherical, the center1 is the location itself
+			return center1;
+		}
+	}
 	/**
 	 * \brief Return the slope of the cylindrical axis assuming its along the z axis
 	 * 
